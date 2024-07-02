@@ -1,0 +1,10 @@
+[package]
+name = "duxcore"
+version = "0.0.0"
+edition = "2021"
+description = "placeholder"
+license = "Apache-2.0"
+repository = "https://gitlab.com/dux-tool/duxcore"
+readme = "README.md"
+
+[dependencies]
