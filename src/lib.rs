@@ -1,1 +1,11 @@
-// Placeholder
+pub mod assignment;
+pub mod changelist;
+pub mod cli;
+pub mod configuration;
+pub mod connection;
+pub mod error;
+pub mod exitcode;
+pub mod hostlist;
+pub mod modules;
+pub mod resultlist;
+pub mod tasklist;
