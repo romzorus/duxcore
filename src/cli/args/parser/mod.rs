@@ -1,9 +1,9 @@
 use clap::Parser;
 
 use crate::cli::args::versions::agent::CliArgsAgent;
-use crate::cli::args::versions::standard::CliArgsStandard;
 use crate::cli::args::versions::scalable::CliArgsScalableController;
 use crate::cli::args::versions::scalable::CliArgsScalableWorker;
+use crate::cli::args::versions::standard::CliArgsStandard;
 use crate::error::Error;
 
 // TODO : for each of these functions, add some arguments checking and default values addition when omitted

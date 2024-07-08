@@ -1,11 +1,11 @@
 pub mod assignment;
-pub mod changelist;
+pub mod change;
 pub mod cli;
 pub mod configuration;
 pub mod connection;
 pub mod error;
 pub mod exitcode;
-pub mod hostlist;
+pub mod host;
 pub mod modules;
-pub mod resultlist;
-pub mod tasklist;
+pub mod result;
+pub mod task;
