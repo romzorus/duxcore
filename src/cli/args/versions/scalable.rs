@@ -32,7 +32,6 @@ pub struct CliArgsScalableController {
 
 /// Dux scalable use case (worker) : get an assignment from a controller and applies it on a remote host
 #[derive(Parser, Debug)]
-#[command(arg_required_else_help(true))]
 #[command(version)]
 pub struct CliArgsScalableWorker {
     /// Path to configuration file
