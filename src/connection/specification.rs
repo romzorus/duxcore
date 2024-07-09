@@ -14,3 +14,8 @@ pub enum Privilege {
     WithSudo,       // Run cmd with sudo
     AsUser(String), // Run cmd as another user
 }
+
+// Message broker (RabbitMQ) part
+// TODO: create a dedicated module for this ?
+
+pub const REFRESH_INTERVAL_MILLI_SECONDS: u64 = 300;
