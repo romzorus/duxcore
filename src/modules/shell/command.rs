@@ -15,7 +15,6 @@ pub struct CommandBlockExpectedState {
 
 impl DryRun for CommandBlockExpectedState {
     fn dry_run_block(&self, hosthandler: &mut HostHandler, privilege: Privilege) -> StepChange {
-
         let mut changes: Vec<ModuleApiCall> = Vec::new();
 
         match &self.content {
@@ -45,7 +44,6 @@ impl Apply for CommandApiCall {
     }
 
     fn apply_moduleblock_change(&self, hosthandler: &mut HostHandler) -> ApiCallResult {
-
         let cmd_result = hosthandler
             .run_cmd(self.cmd.as_str(), self.privilege.clone())
             .unwrap();

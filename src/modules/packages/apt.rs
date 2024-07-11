@@ -17,7 +17,6 @@ pub struct AptBlockExpectedState {
 
 impl DryRun for AptBlockExpectedState {
     fn dry_run_block(&self, hosthandler: &mut HostHandler, privilege: Privilege) -> StepChange {
-
         if !hosthandler.is_this_cmd_available("apt-get").unwrap()
             || !hosthandler.is_this_cmd_available("dpkg").unwrap()
         {
@@ -31,7 +30,6 @@ impl DryRun for AptBlockExpectedState {
             Some(state) => {
                 match state.as_str() {
                     "present" => {
-
                         // Check is package is already installed or needs to be
                         if is_package_installed(hosthandler, self.package.clone().unwrap()) {
                             changes.push(ModuleApiCall::None(format!(
@@ -48,7 +46,6 @@ impl DryRun for AptBlockExpectedState {
                         }
                     }
                     "absent" => {
-
                         // Check is package is already absent or needs to be removed
                         if is_package_installed(hosthandler, self.package.clone().unwrap()) {
                             // Package is present and needs to be removed
@@ -121,7 +118,6 @@ impl Apply for AptApiCall {
     }
 
     fn apply_moduleblock_change(&self, hosthandler: &mut HostHandler) -> ApiCallResult {
-
         match self.action.as_str() {
             "install" => {
                 let cmd = format!(
