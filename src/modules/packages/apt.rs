@@ -17,7 +17,6 @@ pub struct AptBlockExpectedState {
 
 impl DryRun for AptBlockExpectedState {
     fn dry_run_block(&self, hosthandler: &mut HostHandler, privilege: Privilege) -> StepChange {
-        assert!(hosthandler.ssh2.sshsession.authenticated());
 
         if !hosthandler.is_this_cmd_available("apt-get").unwrap()
             || !hosthandler.is_this_cmd_available("dpkg").unwrap()
@@ -32,7 +31,6 @@ impl DryRun for AptBlockExpectedState {
             Some(state) => {
                 match state.as_str() {
                     "present" => {
-                        assert!(hosthandler.ssh2.sshsession.authenticated());
 
                         // Check is package is already installed or needs to be
                         if is_package_installed(hosthandler, self.package.clone().unwrap()) {
@@ -50,7 +48,6 @@ impl DryRun for AptBlockExpectedState {
                         }
                     }
                     "absent" => {
-                        assert!(hosthandler.ssh2.sshsession.authenticated());
 
                         // Check is package is already absent or needs to be removed
                         if is_package_installed(hosthandler, self.package.clone().unwrap()) {
@@ -124,7 +121,6 @@ impl Apply for AptApiCall {
     }
 
     fn apply_moduleblock_change(&self, hosthandler: &mut HostHandler) -> ApiCallResult {
-        assert!(hosthandler.ssh2.sshsession.authenticated());
 
         match self.action.as_str() {
             "install" => {

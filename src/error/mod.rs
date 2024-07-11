@@ -12,4 +12,5 @@ pub enum Error {
     MissingInitialization,
     GroupNotFound,
     MissingGroupsList,
+    WrongInitialization,
 }

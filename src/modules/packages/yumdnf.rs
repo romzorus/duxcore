@@ -18,7 +18,6 @@ pub struct YumDnfBlockExpectedState {
 #[allow(unused_assignments)] // 'tool' is never actually read, only borrowed
 impl DryRun for YumDnfBlockExpectedState {
     fn dry_run_block(&self, hosthandler: &mut HostHandler, privilege: Privilege) -> StepChange {
-        assert!(hosthandler.ssh2.sshsession.authenticated());
 
         let mut tool = String::new();
 
@@ -37,7 +36,6 @@ impl DryRun for YumDnfBlockExpectedState {
             Some(state) => {
                 match state.as_str() {
                     "present" => {
-                        assert!(hosthandler.ssh2.sshsession.authenticated());
 
                         // Check is package is already installed or needs to be
                         if is_package_installed(
@@ -61,7 +59,6 @@ impl DryRun for YumDnfBlockExpectedState {
                         }
                     }
                     "absent" => {
-                        assert!(hosthandler.ssh2.sshsession.authenticated());
 
                         // Check is package is already absent or needs to be removed
                         if is_package_installed(
@@ -141,7 +138,6 @@ impl Apply for YumDnfApiCall {
     }
 
     fn apply_moduleblock_change(&self, hosthandler: &mut HostHandler) -> ApiCallResult {
-        assert!(hosthandler.ssh2.sshsession.authenticated());
 
         match self.action.as_str() {
             "install" => {

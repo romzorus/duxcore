@@ -15,7 +15,6 @@ pub struct CommandBlockExpectedState {
 
 impl DryRun for CommandBlockExpectedState {
     fn dry_run_block(&self, hosthandler: &mut HostHandler, privilege: Privilege) -> StepChange {
-        assert!(hosthandler.ssh2.sshsession.authenticated());
 
         let mut changes: Vec<ModuleApiCall> = Vec::new();
 
@@ -46,7 +45,6 @@ impl Apply for CommandApiCall {
     }
 
     fn apply_moduleblock_change(&self, hosthandler: &mut HostHandler) -> ApiCallResult {
-        assert!(hosthandler.ssh2.sshsession.authenticated());
 
         let cmd_result = hosthandler
             .run_cmd(self.cmd.as_str(), self.privilege.clone())

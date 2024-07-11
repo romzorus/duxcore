@@ -1,6 +1,6 @@
 [package]
 name = "duxcore"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Romzorus <romzorus591@gmail.com>"]
 description = "Embed an automation engine (ansible like) right in your code and adapt it to your specific use cases"

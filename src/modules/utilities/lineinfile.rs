@@ -24,7 +24,6 @@ pub struct LineInFileBlockExpectedState {
 
 impl DryRun for LineInFileBlockExpectedState {
     fn dry_run_block(&self, hosthandler: &mut HostHandler, privilege: Privilege) -> StepChange {
-        assert!(hosthandler.ssh2.sshsession.authenticated());
 
         if !hosthandler.is_this_cmd_available("sed").unwrap() {
             return StepChange::failed_to_evaluate("Sed command not available on this host");
@@ -49,7 +48,6 @@ impl DryRun for LineInFileBlockExpectedState {
             Some(state) => {
                 let change = match state.as_str() {
                     "present" => {
-                        assert!(hosthandler.ssh2.sshsession.authenticated());
 
                         let mut bottom = false;
                         let filenumberoflines = hosthandler
@@ -173,7 +171,6 @@ impl DryRun for LineInFileBlockExpectedState {
                         }
                     }
                     "absent" => {
-                        assert!(hosthandler.ssh2.sshsession.authenticated());
 
                         // Check if line is already present
                         match is_line_present(
@@ -236,7 +233,6 @@ impl Apply for LineInFileApiCall {
     }
 
     fn apply_moduleblock_change(&self, hosthandler: &mut HostHandler) -> ApiCallResult {
-        assert!(hosthandler.ssh2.sshsession.authenticated());
 
         match self.action.as_str() {
             "add" => {

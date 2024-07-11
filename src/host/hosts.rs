@@ -1,6 +1,7 @@
 use serde::Deserialize;
 use std::collections::HashMap;
 
+// TODO : add a connection mode field
 #[derive(Debug, Deserialize, Clone)]
 pub struct Host {
     pub address: String,

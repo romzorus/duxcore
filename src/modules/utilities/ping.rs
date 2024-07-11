@@ -12,7 +12,6 @@ pub struct PingBlockExpectedState {}
 
 impl DryRun for PingBlockExpectedState {
     fn dry_run_block(&self, hosthandler: &mut HostHandler, privilege: Privilege) -> StepChange {
-        assert!(hosthandler.ssh2.sshsession.authenticated());
 
         let cmd = String::from("DEBIAN_FRONTEND=noninteractive id");
         let cmd_result = hosthandler.run_cmd(cmd.as_str(), privilege).unwrap();

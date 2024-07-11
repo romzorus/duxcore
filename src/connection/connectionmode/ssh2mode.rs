@@ -7,6 +7,21 @@ use std::io::Read;
 use std::net::TcpStream;
 use std::path::PathBuf;
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Ssh2ConnectionDetails {
+    pub hostaddress: String,
+    pub authmode: Ssh2AuthMode,
+}
+
+impl Ssh2ConnectionDetails {
+    pub fn from(hostaddress: String, authmode: Ssh2AuthMode) -> Ssh2ConnectionDetails {
+        Ssh2ConnectionDetails {
+            hostaddress,
+            authmode
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct Ssh2HostHandler {
     pub hostaddress: String,
