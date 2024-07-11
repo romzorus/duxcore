@@ -17,7 +17,7 @@ impl Ssh2ConnectionDetails {
     pub fn from(hostaddress: String, authmode: Ssh2AuthMode) -> Ssh2ConnectionDetails {
         Ssh2ConnectionDetails {
             hostaddress,
-            authmode
+            authmode,
         }
     }
 }

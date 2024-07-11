@@ -2,14 +2,22 @@ use crate::connection::specification::Credentials;
 use crate::error::Error;
 use crate::result::cmd::CmdResult;
 use serde::{Deserialize, Serialize};
-use std::io::Read;
-use std::net::TcpStream;
-use std::path::PathBuf;
 use std::process::Command;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LocalHostConnectionDetails {
     pub user: WhichUser,
+}
+
+impl LocalHostConnectionDetails {
+    pub fn user(user: WhichUser) -> LocalHostConnectionDetails {
+        LocalHostConnectionDetails { user }
+    }
+    pub fn current_user() -> LocalHostConnectionDetails {
+        LocalHostConnectionDetails {
+            user: WhichUser::CurrentUser,
+        }
+    }
 }
 
 #[derive(Clone)]

@@ -1,7 +1,5 @@
 use crate::connection::connectionmode::localhost::{LocalHostConnectionDetails, LocalHostHandler};
-use crate::connection::connectionmode::ssh2mode::{
-    Ssh2AuthMode, Ssh2ConnectionDetails, Ssh2HostHandler,
-};
+use crate::connection::connectionmode::ssh2mode::{Ssh2ConnectionDetails, Ssh2HostHandler};
 use crate::connection::specification::{ConnectionMode, Privilege};
 use crate::error::Error;
 use crate::result::cmd::CmdResult;
@@ -53,7 +51,9 @@ impl HostHandler {
                 {
                     Ok(HostHandler {
                         connectionmode: hosthandlinginfo.connectionmode.clone(),
-                        localhost: Some(LocalHostHandler::from(localhostconnectiondetails.user.clone())),
+                        localhost: Some(LocalHostHandler::from(
+                            localhostconnectiondetails.user.clone(),
+                        )),
                         ssh2: None,
                     })
                 } else {

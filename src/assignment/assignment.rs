@@ -1,15 +1,13 @@
 use crate::change::changelist::ChangeList;
 use crate::change::stepchange::StepChange;
-use crate::connection::connectionmode::ssh2mode::Ssh2AuthMode;
 use crate::connection::hosthandler::HostHandler;
-use crate::connection::specification::ConnectionMode;
+use crate::connection::hosthandler::HostHandlingInfo;
 use crate::error::Error;
 use crate::result::apicallresult::ApiCallStatus;
 use crate::result::resultlist::ResultList;
 use crate::task::moduleblock::ModuleApiCall;
 use crate::task::tasklist::RunningMode;
 use crate::task::tasklist::TaskList;
-use crate::connection::hosthandler::HostHandlingInfo;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -18,8 +16,6 @@ pub struct Assignment {
     pub correlationid: String,
     pub runningmode: RunningMode,
     pub host: String,
-    // pub connectionmode: ConnectionMode,
-    // pub authmode: Ssh2AuthMode,
     pub hosthandlinginfo: HostHandlingInfo,
     pub variables: HashMap<String, String>,
     pub tasklist: TaskList,
@@ -34,8 +30,6 @@ impl Assignment {
             correlationid,
             runningmode: RunningMode::DryRun, // DryRun is default running mode
             host: String::from(""),
-            // connectionmode: ConnectionMode::Unset,
-            // authmode: Ssh2AuthMode::Unset,
             hosthandlinginfo: HostHandlingInfo::new(),
             variables: HashMap::new(),
             tasklist: TaskList::new(),
@@ -49,8 +43,6 @@ impl Assignment {
         correlationid: String,
         runningmode: RunningMode,
         host: String,
-        // connectionmode: ConnectionMode,
-        // authmode: Ssh2AuthMode,
         hosthandlinginfo: HostHandlingInfo,
         variables: HashMap<String, String>,
         tasklist: TaskList,
@@ -62,8 +54,6 @@ impl Assignment {
             correlationid,
             runningmode,
             host,
-            // connectionmode,
-            // authmode,
             hosthandlinginfo,
             variables,
             tasklist,
