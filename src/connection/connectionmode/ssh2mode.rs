@@ -1,3 +1,4 @@
+use crate::connection::specification::Credentials;
 use crate::error::Error;
 use crate::result::cmd::CmdResult;
 use serde::{Deserialize, Serialize};
@@ -139,16 +140,4 @@ pub enum Ssh2AuthMode {
     UsernamePassword(Credentials),
     SshKeys((String, PathBuf)), // (username, private key's path)
     SshAgent(String),           // Name of SSH agent
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Credentials {
-    username: String,
-    password: String,
-}
-
-impl Credentials {
-    pub fn from(username: String, password: String) -> Credentials {
-        Credentials { username, password }
-    }
 }
