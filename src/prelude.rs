@@ -3,7 +3,6 @@ pub use crate::assignment::assignment::AssignmentFinalStatus;
 pub use crate::assignment::correlationid::CorrelationIdGenerator;
 pub use crate::change::changelist::ChangeList;
 pub use crate::cli::args::parser::*;
-pub use crate::cli::args::versions::agent::CliArgsAgent;
 pub use crate::cli::args::versions::scalable::CliArgsScalableController;
 pub use crate::cli::args::versions::scalable::CliArgsScalableWorker;
 pub use crate::cli::args::versions::standard::CliArgsStandard;
