@@ -1,6 +1,6 @@
 pub mod assignment;
 pub mod change;
-pub mod cli;
+pub mod output;
 pub mod configuration;
 pub mod connection;
 pub mod error;
