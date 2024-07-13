@@ -4,13 +4,18 @@ use serde::Deserialize;
 
 #[derive(Deserialize)]
 pub struct DuxConfigAgent {
-    // Placeholder
+    pub source: Source
 }
 
 impl DuxConfigAgent {
     pub fn default() -> DuxConfigAgent {
         DuxConfigAgent {
-            // Placeholder
+            source: Source {
+                method: Some("local".to_string()),
+                url: None,
+                branch: None,
+                path: Some("/tmp/dux/tasklist.yaml".to_string())
+            }
         }
     }
 
@@ -42,4 +47,12 @@ impl DuxConfigAgent {
             }
         }
     }
+}
+
+#[derive(Deserialize)]
+pub struct Source {
+    pub method: Option<String>, // local | http | git
+    pub url: Option<String>, // http (url of file) | git (url of repo (.git))
+    pub branch: Option<String>, // git (branch to pull)
+    pub path: Option<String>, // local (path to tasklist file) | git (file to consider once the local repo is synced)
 }
