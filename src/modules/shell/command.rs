@@ -14,7 +14,7 @@ pub struct CommandBlockExpectedState {
 }
 
 impl DryRun for CommandBlockExpectedState {
-    fn dry_run_block(&self, hosthandler: &mut HostHandler, privilege: Privilege) -> StepChange {
+    fn dry_run_block(&self, _hosthandler: &mut HostHandler, privilege: Privilege) -> StepChange {
         let mut changes: Vec<ModuleApiCall> = Vec::new();
 
         match &self.content {
