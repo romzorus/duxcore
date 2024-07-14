@@ -10,8 +10,23 @@ Instead of having one big automation tool (meaning configuration management or o
 # Examples
 So far, 3 versions are being built based on this crate (as proofs of concept):
 - [**standard**](https://gitlab.com/dux-tool/dux-standard) : one executable taking a list of tasks and a list of hosts as input (plus extra such as username, key...) and applying these tasks to these *controlled* hosts
+
+<div align="center">
+<img src="img/standard-illustration.png" width="60%">
+</div>
+
 - **scalable** ([controller node](https://gitlab.com/dux-tool/dux-scalable-controller), [worker node](https://gitlab.com/dux-tool/dux-scalable-worker)): turned into a microservice architecture, the tasks are created by controller nodes, sent to a message broker (RabbitMQ), fetched by worker nodes (these are the one actually doing something on the *controlled* hosts) and the results are sent back to the controllers through the message broker. This allows to multiply the number of *controlled* hosts handled simultaneously by increasing the number of worker nodes
+
+<div align="center">
+<img src="img/scalable-illustration.png" width="80%">
+</div>
+
 - [**agent**](https://gitlab.com/dux-tool/dux-agent) : one executable running as a service on a host. This service regularly applies a task list on its own host. This task list can be a local file or fetched via multiple methods (https, ftp, git...). It allows a *pull mode* : the *controlled* hosts are actively looking for tasks to apply to themselves. All the operator has to do is to update the task list and the rest will take place on its own.
+
+<div align="center">
+<img src="img/agent-illustration.png" width="60%">
+</div>
+
 
 # Contribution / help / discussion
 Want some help to use this crate for your own situation ? Open to suggestions, feedback, requests and any contribution !
