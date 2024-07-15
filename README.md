@@ -31,3 +31,30 @@ So far, 3 versions are being built based on this crate (as proofs of concept):
 # Contribution / help / discussion
 Want some help to use this crate for your own situation ? Open to suggestions, feedback, requests and any contribution !
 Will gladly exchange ideas with you right [there](https://discord.com/invite/2gxAW7uzsx) !
+
+
+# Modules available
+*(alphabetized)*
+| Module | Description |
+| ---      | ---      |
+| `apt` | Manage packages on Debian-like distributions |
+| `command` | Run a single shell command on the controlled host |
+| `dnf` | Manage packages on Fedora-like distributions (no difference with `yum`) |
+| `lineinfile` | Manipulate lines in a file (add, delete) |
+| `ping` | Test SSH connectivity with remote host |
+| `yum` | Manage packages on Fedora-like distributions (no difference with `dnf`) |
+
+
+# Todo list
+- [ ] Global : optimization (lots of `clone` out there...)
+- [ ] Global : error handling (lots of `unwrap` out there...)
+- [ ] HostList: introduce aliases and connection mode
+- [ ] HostList: add JSON format handling
+- [ ] TaskExec: modules need to produce a standardized JSON result, reusable directly by later steps ('register')
+- [ ] RabbitMQ: turn connections parts into a crate
+- [ ] RabbitMQ: add resiliency mechanisms (lost connection...etc)
+- [ ] Connection: introduce compatibility with [QUIC](https://github.com/quinn-rs/quinn), [SSH3](https://github.com/francoismichel/ssh3), other protocol ?
+- [ ] modules to handle Android and IOT devices ?
+- [ ] full ansible syntax compatibility
+- [ ] log generation : what is applied when on what, syslog interaction, ability to generate JSON content (for log aggregators for example)
+- [ ] Create a gRPC based example implementation
