@@ -1,12 +1,12 @@
 pub mod assignment;
 pub mod change;
-pub mod output;
 pub mod configuration;
 pub mod connection;
 pub mod error;
 pub mod exitcode;
 pub mod host;
 pub mod modules;
+pub mod output;
 pub mod prelude;
 pub mod result;
 pub mod task;

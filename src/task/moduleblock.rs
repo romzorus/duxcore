@@ -12,6 +12,7 @@ use crate::result::apicallresult::ApiCallResult;
 pub enum ModuleBlockExpectedState {
     None, // Used for new() methods, initializations and errors
     // **BEACON_2**
+    Service(ServiceBlockExpectedState),
     LineInFile(LineInFileBlockExpectedState),
     Command(CommandBlockExpectedState),
     Apt(AptBlockExpectedState),
@@ -34,6 +35,7 @@ impl ModuleBlockExpectedState {
         let mbchange: StepChange = match &self {
             ModuleBlockExpectedState::None => StepChange::matched("none"),
             // **BEACON_3**
+            ModuleBlockExpectedState::Service(block) => block.dry_run_block(hosthandler, privilege),
             ModuleBlockExpectedState::LineInFile(block) => {
                 block.dry_run_block(hosthandler, privilege)
             }
@@ -63,6 +65,7 @@ impl ModuleBlockExpectedState {
 pub enum ModuleApiCall {
     None(String),
     // **BEACON_4**
+    Service(ServiceApiCall),
     LineInFile(LineInFileApiCall),
     Command(CommandApiCall),
     Apt(AptApiCall),

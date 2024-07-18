@@ -12,3 +12,6 @@ pub use crate::modules::utilities::ping::PingBlockExpectedState;
 
 pub use crate::modules::packages::yumdnf::YumDnfApiCall;
 pub use crate::modules::packages::yumdnf::YumDnfBlockExpectedState;
+
+pub use crate::modules::system::service::ServiceApiCall;
+pub use crate::modules::system::service::ServiceBlockExpectedState;

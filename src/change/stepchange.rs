@@ -43,6 +43,7 @@ impl StepChange {
                     let apicalldisplay = match change {
                         ModuleApiCall::None(message) => message.clone(),
                         // **BEACON_1**
+                        ModuleApiCall::Service(block) => block.display(),
                         ModuleApiCall::LineInFile(block) => block.display(),
                         ModuleApiCall::Command(block) => block.display(),
                         ModuleApiCall::Apt(block) => block.display(),
@@ -67,6 +68,7 @@ impl StepChange {
                     let apicallresult = match change {
                         ModuleApiCall::None(_) => ApiCallResult::none(),
                         // **BEACON_2**
+                        ModuleApiCall::Service(block) => block.apply_moduleblock_change(hosthandler),
                         ModuleApiCall::LineInFile(block) => {
                             block.apply_moduleblock_change(hosthandler)
                         }
