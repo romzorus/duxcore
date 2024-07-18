@@ -167,7 +167,7 @@ impl Apply for ServiceApiCall {
                 let cmd_result = hosthandler
                     .run_cmd(
                         format!("systemctl start {}", self.name).as_str(),
-                        Privilege::Usual,
+                        self.privilege.clone(),
                     )
                     .unwrap();
 
@@ -189,7 +189,7 @@ impl Apply for ServiceApiCall {
                 let cmd_result = hosthandler
                     .run_cmd(
                         format!("systemctl stop {}", self.name).as_str(),
-                        Privilege::Usual,
+                        self.privilege.clone(),
                     )
                     .unwrap();
 
@@ -211,7 +211,7 @@ impl Apply for ServiceApiCall {
                 let cmd_result = hosthandler
                     .run_cmd(
                         format!("systemctl enable {}", self.name).as_str(),
-                        Privilege::Usual,
+                        self.privilege.clone(),
                     )
                     .unwrap();
 
@@ -233,7 +233,7 @@ impl Apply for ServiceApiCall {
                 let cmd_result = hosthandler
                     .run_cmd(
                         format!("systemctl disable {}", self.name).as_str(),
-                        Privilege::Usual,
+                        self.privilege.clone(),
                     )
                     .unwrap();
 
