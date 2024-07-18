@@ -120,6 +120,10 @@ impl Apply for AptApiCall {
     fn apply_moduleblock_change(&self, hosthandler: &mut HostHandler) -> ApiCallResult {
         match self.action.as_str() {
             "install" => {
+                hosthandler
+                .run_cmd("apt-get update", self.privilege.clone())
+                .unwrap();
+            
                 let cmd = format!(
                     "DEBIAN_FRONTEND=noninteractive apt-get install -y {}",
                     self.package.clone().unwrap()
