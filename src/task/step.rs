@@ -66,6 +66,8 @@ impl Step {
 
         if counter > 1 {
             return Err(String::from("Too much modules defined in this step"));
+        } else if let None = self.moduleblock {
+            return Err(String::from("No module found in this step"));
         } else {
             return Ok(());
         }
