@@ -42,6 +42,7 @@ Will gladly exchange ideas with you right [there](https://discord.com/invite/2gx
 | `dnf` | Manage packages on Fedora-like distributions (no difference with `yum`) |
 | `lineinfile` | Manipulate lines in a file (add, delete) |
 | `ping` | Test SSH connectivity with remote host |
+| `service` | Manage services on the controlled host |
 | `yum` | Manage packages on Fedora-like distributions (no difference with `dnf`) |
 
 
