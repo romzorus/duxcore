@@ -82,7 +82,7 @@ impl Ssh2HostHandler {
                                 )));
                             }
                         }
-                        Ssh2AuthMode::SshKeys((username, privatekeypath)) => {
+                        Ssh2AuthMode::Keys((username, privatekeypath)) => {
                             self.sshsession
                                 .userauth_pubkey_file(
                                     username.as_str(),
@@ -99,7 +99,7 @@ impl Ssh2HostHandler {
                                 )));
                             }
                         }
-                        Ssh2AuthMode::SshAgent(_agent) => {
+                        Ssh2AuthMode::Agent(_agent) => {
                             return Ok(());
                         } // TODO
                         _ => return Err(Error::FailedInitialization(String::from("Other error"))),
@@ -153,6 +153,6 @@ impl Ssh2HostHandler {
 pub enum Ssh2AuthMode {
     Unset,
     UsernamePassword(Credentials),
-    SshKeys((String, PathBuf)), // (username, private key's path)
-    SshAgent(String),           // Name of SSH agent
+    Keys((String, PathBuf)), // (username, private key's path)
+    Agent(String),           // Name of SSH agent
 }
