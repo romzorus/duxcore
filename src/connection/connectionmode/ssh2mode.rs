@@ -1,6 +1,7 @@
 use crate::connection::specification::Credentials;
 use crate::error::Error;
 use crate::result::cmd::CmdResult;
+use pem::Pem;
 use serde::{Deserialize, Serialize};
 use ssh2::Session;
 use std::io::Read;
@@ -82,12 +83,29 @@ impl Ssh2HostHandler {
                                 )));
                             }
                         }
-                        Ssh2AuthMode::Keys((username, privatekeypath)) => {
+                        Ssh2AuthMode::KeyFile((username, privatekeypath)) => {
                             self.sshsession
                                 .userauth_pubkey_file(
                                     username.as_str(),
                                     None,
                                     &privatekeypath,
+                                    None,
+                                )
+                                .unwrap(); // TODO : add pubkey and passphrase support
+                            if self.sshsession.authenticated() {
+                                return Ok(());
+                            } else {
+                                return Err(Error::FailedInitialization(String::from(
+                                    "PLACEHOLDER",
+                                )));
+                            }
+                        }
+                        Ssh2AuthMode::KeyMemory((username, pem)) => {
+                            self.sshsession
+                                .userauth_pubkey_memory(
+                                    username.as_str(),
+                                    None,
+                                    pem.to_string().as_str(), // Pem struct doesn't implement directly '.as_str()' but accepts '.to_string()'
                                     None,
                                 )
                                 .unwrap(); // TODO : add pubkey and passphrase support
@@ -153,6 +171,7 @@ impl Ssh2HostHandler {
 pub enum Ssh2AuthMode {
     Unset,
     UsernamePassword(Credentials),
-    Keys((String, PathBuf)), // (username, private key's path)
+    KeyFile((String, PathBuf)), // (username, private key's path)
+    KeyMemory((String, Pem)),   // (username, PEM encoded key from memory)
     Agent(String),           // Name of SSH agent
 }
