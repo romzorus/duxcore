@@ -10,8 +10,6 @@ repository = "https://gitlab.com/dux-tool/duxcore"
 readme = "README.md"
 
 [dependencies]
-config = "0.14.0"
-clap = { version = "4.5.3", features = ["derive"] }
 machineid-rs = "1.2.4"
 serde = {version = "1.0.188", features= ["derive"]}
 serde_yaml = "0.9.32"
