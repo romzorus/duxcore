@@ -1,6 +1,5 @@
 pub mod assignment;
 pub mod change;
-pub mod configuration;
 pub mod connection;
 pub mod error;
 pub mod exitcode;
