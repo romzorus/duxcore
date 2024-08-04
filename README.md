@@ -7,6 +7,9 @@
 # The goal
 Instead of having one big automation tool (meaning configuration management or orchestration tool) trying to handle all scenarios (be scalable, performant, handle local and remote hosts through this protocol or this one, be compliant with this security standard and this one...), we prefer to build one flexible automation *engine* (this crate) and make it as easy as possible to embed in a codebase already adapted to one's specific need.
 
+# Documentation
+A *book* has been open [here](https://www.dux-automate.org/) about the dux project.
+
 # Examples
 So far, 3 versions are being built based on this crate (as proofs of concept):
 - [**standard**](https://gitlab.com/dux-tool/dux-standard) : one executable taking a list of tasks and a list of hosts as input (plus extra such as username, key...) and applying these tasks to these *controlled* hosts
