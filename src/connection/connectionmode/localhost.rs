@@ -72,5 +72,6 @@ impl LocalHostHandler {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum WhichUser {
     CurrentUser,
+    PasswordLessUser(String), // The String being the username
     UsernamePassword(Credentials),
 }
