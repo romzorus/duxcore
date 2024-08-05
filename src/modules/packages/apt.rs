@@ -224,9 +224,11 @@ fn is_package_installed(hosthandler: &mut HostHandler, package: String) -> bool 
         .run_cmd(format!("dpkg -s {}", package).as_str(), Privilege::Usual)
         .unwrap();
 
-    if test.exitcode == 0 {
-        return true;
+    if test.exitcode == 0 && test.stdout.contains("Status: install") {
+        true
+    } else if test.exitcode == 0 && test.stdout.contains("Status: deinstall") {
+        false
     } else {
-        return false;
+        false
     }
 }
