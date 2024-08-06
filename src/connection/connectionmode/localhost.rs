@@ -57,7 +57,33 @@ impl LocalHostHandler {
     }
 
     pub fn run_cmd(&self, cmd: &str) -> Result<CmdResult, Error> {
-        let result = Command::new("sh").arg("-c").arg(cmd).output();
+
+        let result = match &self.user {
+            WhichUser::CurrentUser => {
+                Command::new("sh")
+                    .arg("-c")
+                    .arg(cmd)
+                    .output()
+            }
+            WhichUser::PasswordLessUser(username) => {
+                Command::new("su")
+                    .arg("-")
+                    .arg(username)
+                    .arg("-c")
+                    .arg("sh")
+                    .arg("-c")
+                    .arg(cmd)
+                    .output()
+            }
+            WhichUser::UsernamePassword(credentials) => {
+                let command_content = format!("\"echo \"{}\" | su - {} -c \"{}\"\"", credentials.password, credentials.username, cmd);
+
+                Command::new("sh")
+                    .arg("-c")
+                    .arg(command_content)
+                    .output()
+            }
+        };
 
         match result {
             Ok(output) => Ok(CmdResult {
