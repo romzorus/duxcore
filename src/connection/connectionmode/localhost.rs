@@ -77,7 +77,7 @@ impl LocalHostHandler {
             }
             WhichUser::UsernamePassword(credentials) => {
                 let command_content = format!("\"echo \"{}\" | su - {} -c \"{}\"\"", credentials.password, credentials.username, cmd);
-
+                println!("[DEBUG] {}", command_content);
                 Command::new("sh")
                     .arg("-c")
                     .arg(command_content)
