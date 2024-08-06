@@ -63,12 +63,14 @@ impl LocalHostHandler {
 
         let result = match &self.user {
             WhichUser::CurrentUser => {
+                println!("[DEBUG] WhichUser::CurrentUser");
                 Command::new("sh")
                     .arg("-c")
                     .arg(cmd)
                     .output()
             }
             WhichUser::PasswordLessUser(username) => {
+                println!("[DEBUG] WhichUser::PasswordLessUser");
                 Command::new("su")
                     .arg("-")
                     .arg(username)
@@ -79,6 +81,7 @@ impl LocalHostHandler {
                     .output()
             }
             WhichUser::UsernamePassword(credentials) => {
+                println!("[DEBUG] WhichUser::UsernamePassword");
                 let command_content = format!("\"echo \"{}\" | su - {} -c \"{}\"\"", credentials.password, credentials.username, cmd);
 
                 Command::new("sh")
