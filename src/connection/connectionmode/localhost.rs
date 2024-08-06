@@ -39,12 +39,17 @@ impl LocalHostHandler {
     }
 
     pub fn is_this_cmd_available(&self, cmd: &str) -> Result<bool, Error> {
-        let check_cmd_content = format!("command -v {}", cmd);
-        let check_cmd_result = self.run_cmd(check_cmd_content.as_str());
+
+        let check_cmd_result = Command::new("sh")
+            .arg("-c")
+            .arg (format!(
+                "command -v {}", cmd
+            ))
+            .output();
 
         match check_cmd_result {
             Ok(cmd_result) => {
-                if cmd_result.exitcode == 0 {
+                if cmd_result.status.code().unwrap() == 0 {
                     return Ok(true);
                 } else {
                     return Ok(false);
@@ -60,12 +65,14 @@ impl LocalHostHandler {
 
         let result = match &self.user {
             WhichUser::CurrentUser => {
+
                 Command::new("sh")
                     .arg("-c")
                     .arg(cmd)
                     .output()
             }
             WhichUser::PasswordLessUser(username) => {
+
                 Command::new("su")
                     .arg("-")
                     .arg(username)
@@ -76,7 +83,8 @@ impl LocalHostHandler {
                     .output()
             }
             WhichUser::UsernamePassword(credentials) => {
-                let command_content = format!("\"echo \"{}\" | su - {} -c \"{}\"\"", credentials.password, credentials.username, cmd);
+
+                let command_content = format!("echo \"{}\" | su - {} -c \"{}\"", credentials.password, credentials.username, cmd);
 
                 Command::new("sh")
                     .arg("-c")
