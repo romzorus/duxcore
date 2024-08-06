@@ -40,9 +40,11 @@ impl LocalHostHandler {
 
     pub fn is_this_cmd_available(&self, cmd: &str) -> Result<bool, Error> {
 
-        let check_cmd_result = Command::new("command")
-            .arg("-v")
-            .arg(cmd)
+        let check_cmd_result = Command::new("sh")
+            .arg("-c")
+            .arg (format!(
+                "command -v {}", cmd
+            ))
             .output();
 
         match check_cmd_result {
