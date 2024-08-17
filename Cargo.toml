@@ -18,5 +18,10 @@ sha2 = "0.10.8"
 ssh2 = "0.9.4"
 tera = "1.20.0"
 colored = "2.1.0"
-termimad = "0.29.1"
+termimad = "0.30.0"
 pem = { version = "3.0.4", features = ["serde"] }
+criterion = "0.5.1"
+
+[[bench]]
+name = "dux_perf"
+harness = false
