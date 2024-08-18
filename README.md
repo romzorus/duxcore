@@ -8,7 +8,7 @@
 Instead of having one big automation tool (meaning configuration management or orchestration tool) trying to handle all scenarios (be scalable, performant, handle local and remote hosts through this protocol or this one, be compliant with this security standard and this one...), we prefer to build one flexible automation *engine* (this crate) and make it as easy as possible to embed in a codebase already adapted to one's specific need.
 
 # Documentation
-A *book* has been open [here](https://www.dux-automate.org/) about the dux project.
+A *book* has been opened [here](https://www.dux-automate.org/book/) about the dux project.
 
 # Examples
 So far, 3 versions are being built based on this crate (as proofs of concept):
@@ -49,16 +49,6 @@ Will gladly exchange ideas with you right [there](https://discord.com/invite/2gx
 | `yum` | Manage packages on Fedora-like distributions (no difference with `dnf`) |
 
 
-# Todo list
-- [ ] Global : optimization (lots of `clone` out there...)
-- [ ] Global : error handling (lots of `unwrap` out there...)
-- [ ] HostList: introduce aliases and connection mode
-- [ ] HostList: add JSON format handling
-- [ ] TaskExec: modules need to produce a standardized JSON result, reusable directly by later steps ('register')
-- [ ] RabbitMQ: turn connections parts into a crate
-- [ ] RabbitMQ: add resiliency mechanisms (lost connection...etc)
-- [ ] Connection: introduce compatibility with [QUIC](https://github.com/quinn-rs/quinn), [SSH3](https://github.com/francoismichel/ssh3), other protocol ?
-- [ ] modules to handle Android and IOT devices ?
-- [ ] full ansible syntax compatibility
-- [ ] log generation : what is applied when on what, syslog interaction, ability to generate JSON content (for log aggregators for example)
-- [ ] Create a gRPC based example implementation
+# What's next
+
+Take a look [here](https://www.dux-automate.org/book/what_next.html) to see what is expected to come next.
