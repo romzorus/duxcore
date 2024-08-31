@@ -68,29 +68,39 @@ Examples of how the Dux crate can be used are being built as separate projects. 
 ## Standard implementation
 > One binary doing everything
 
-Dux standard project : [https://gitlab.com/dux-tool/dux-standard](https://gitlab.com/dux-tool/dux-standard)
+Dux standard project : [dux-standard](https://gitlab.com/dux-tool/dux-standard)
 
 <div align="center">
 <img src="img/standard-illustration.png" width="60%">
 </div>
 
-## Scalable implementation
-> Workload split between a controller and workers nodes, with a message broker in the middle to allow scaling the number of workers
-
-Dux scalable controller project : [https://gitlab.com/dux-tool/dux-scalable-controller](https://gitlab.com/dux-tool/dux-scalable-controller)  
-Dux scalable worker project : [https://gitlab.com/dux-tool/dux-scalable-worker](https://gitlab.com/dux-tool/dux-scalable-worker)
-
-<div align="center">
-<img src="img/scalable-illustration.png" width="80%">
-</div>
-
 ## Agent implementation
 > A Dux agent running as a background service, regularly fetching a remote tasklist (http/https, git...) and applying it to itself
 
-Dux agent project : [https://gitlab.com/dux-tool/dux-agent](https://gitlab.com/dux-tool/dux-agent)
+Dux agent project : [dux-agent](https://gitlab.com/dux-tool/dux-agent)
 
 <div align="center">
 <img src="img/agent-illustration.png" width="60%">
+</div>
+
+## Distributed implementation
+> Workload split between a controller which generates Assignments and workers which actually run them on targetted hosts
+
+Dux distributed controller project : [dux-distributed-controller](https://gitlab.com/dux-tool/dux-distributed-controller)  
+Dux distributed worker project : [dux-distributed-worker](https://gitlab.com/dux-tool/dux-distributed-worker)
+
+<div align="center">
+<img src="img/distributed-illustration.png" width="80%">
+</div>
+
+## Scalable implementation
+> Workload split between a controller and workers nodes, with a message broker in the middle to allow scaling up and down the number of workers
+
+Dux scalable controller project : [dux-scalable-controller](https://gitlab.com/dux-tool/dux-scalable-controller)  
+Dux scalable worker project : [dux-scalable-worker](https://gitlab.com/dux-tool/dux-scalable-worker)
+
+<div align="center">
+<img src="img/scalable-illustration.png" width="80%">
 </div>
 
 
