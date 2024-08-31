@@ -6,6 +6,7 @@ use crate::connection::specification::Privilege;
 use crate::result::apicallresult::{ApiCallResult, ApiCallStatus};
 use crate::task::moduleblock::ModuleApiCall;
 use crate::task::moduleblock::{Apply, DryRun};
+use crate::error::Error;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -23,9 +24,11 @@ pub struct LineInFileBlockExpectedState {
 }
 
 impl DryRun for LineInFileBlockExpectedState {
-    fn dry_run_block(&self, hosthandler: &mut HostHandler, privilege: Privilege) -> StepChange {
+    fn dry_run_block(&self, hosthandler: &mut HostHandler, privilege: Privilege) -> Result<StepChange, Error> {
         if !hosthandler.is_this_cmd_available("sed").unwrap() {
-            return StepChange::failed_to_evaluate("Sed command not available on this host");
+            return Err(Error::FailedDryRunEvaluation(
+                "Sed command not available on this host".to_string()
+            ));
         }
 
         let file_exists_check = hosthandler
@@ -36,9 +39,9 @@ impl DryRun for LineInFileBlockExpectedState {
             .unwrap();
 
         if file_exists_check.exitcode != 0 {
-            return StepChange::failed_to_evaluate(
-                format!("{} not found or not a regular file", self.filepath).as_str(),
-            );
+            return Err(Error::FailedDryRunEvaluation(
+                format!("{} not found or not a regular file", self.filepath),
+            ));
         }
 
         let mut changes: Vec<ModuleApiCall> = Vec::new();
@@ -76,17 +79,18 @@ impl DryRun for LineInFileBlockExpectedState {
                                                 if linenumber <= filenumberoflines {
                                                     Some(linenumber)
                                                 } else {
-                                                    return StepChange::failed_to_evaluate("Position value out of range (use \"bottom\" instead)");
+                                                    return Err(Error::FailedDryRunEvaluation(
+                                                        "Position value out of range (use \"bottom\" instead)".to_string()
+                                                    ));
                                                 }
                                             }
                                             Err(e) => {
-                                                return StepChange::failed_to_evaluate(
+                                                return Err(Error::FailedDryRunEvaluation(
                                                     format!(
                                                         "Failed to parse position value : {}",
                                                         e
-                                                    )
-                                                    .as_str(),
-                                                );
+                                                    ),
+                                                ));
                                             }
                                         }
                                     }
@@ -197,7 +201,7 @@ impl DryRun for LineInFileBlockExpectedState {
             None => {}
         }
 
-        return StepChange::changes(changes);
+        return Ok(StepChange::changes(changes));
     }
 }
 

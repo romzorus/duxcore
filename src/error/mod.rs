@@ -10,8 +10,10 @@ pub enum Error {
     FailedInitialization(String),
     FailedTcpBinding(String),
     FailedTaskDryRun(String),
+    FailedDryRunEvaluation(String),
     MissingInitialization(String),
     GroupNotFound,
     MissingGroupsList,
     WrongInitialization,
+    AnyOtherError(String)
 }

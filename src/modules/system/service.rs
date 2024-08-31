@@ -6,6 +6,7 @@ use crate::connection::specification::Privilege;
 use crate::result::apicallresult::{ApiCallResult, ApiCallStatus};
 use crate::task::moduleblock::ModuleApiCall;
 use crate::task::moduleblock::{Apply, DryRun};
+use crate::error::Error;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -16,21 +17,23 @@ pub struct ServiceBlockExpectedState {
 }
 
 impl DryRun for ServiceBlockExpectedState {
-    fn dry_run_block(&self, hosthandler: &mut HostHandler, privilege: Privilege) -> StepChange {
+    fn dry_run_block(&self, hosthandler: &mut HostHandler, privilege: Privilege) -> Result<StepChange, Error> {
         // Prechecks
 
         if !hosthandler.is_this_cmd_available("systemctl").unwrap() {
-            return StepChange::failed_to_evaluate("SYSTEMCTL not available on this host");
+            return Err(Error::FailedDryRunEvaluation(
+                "SYSTEMCTL not available on this host".to_string()
+            ));
         }
 
         let service_is_running = match service_is_active(hosthandler, &self.name) {
             Ok(running_state) => running_state,
-            Err(e) => return StepChange::failed_to_evaluate(e.as_str()),
+            Err(e) => return Err(Error::FailedDryRunEvaluation(e)),
         };
 
         let service_is_enabled = match service_is_enabled(hosthandler, &self.name) {
             Ok(enabled_state) => enabled_state,
-            Err(e) => return StepChange::failed_to_evaluate(e.as_str()),
+            Err(e) => return Err(Error::FailedDryRunEvaluation(e)),
         };
 
         // Changes assessment
@@ -41,9 +44,9 @@ impl DryRun for ServiceBlockExpectedState {
         // - mutually exclusive
         if let (None, None) = (&self.state, &self.enabled) {
             // PROBLEM : both 'state' and 'enabled' are empty
-            return StepChange::failed_to_evaluate(
-                "STATE and ENABLED fields are both empty in provided Task List",
-            );
+            return Err(Error::FailedDryRunEvaluation(
+                "STATE and ENABLED fields are both empty in provided Task List".to_string()
+            ));
         } else {
             match &self.state {
                 Some(state_content) => {
@@ -125,11 +128,11 @@ impl DryRun for ServiceBlockExpectedState {
             match change {
                 ModuleApiCall::None(_) => {}
                 _ => {
-                    return StepChange::changes(changes);
+                    return Ok(StepChange::changes(changes));
                 }
             }
         }
-        return StepChange::matched("Package(s) already in expected state");
+        return Ok(StepChange::matched("Package(s) already in expected state"));
     }
 }
 

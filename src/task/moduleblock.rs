@@ -32,8 +32,8 @@ impl ModuleBlockExpectedState {
         privilege: Privilege,
         allowed_to_fail: bool,
     ) -> Result<(StepChange, bool), Error> {
-        let mbchange: StepChange = match &self {
-            ModuleBlockExpectedState::None => StepChange::matched("none"),
+        let mbchange_result: Result<StepChange, Error> = match &self {
+            ModuleBlockExpectedState::None => Ok(StepChange::matched("none")),
             // **BEACON_3**
             ModuleBlockExpectedState::Service(block) => block.dry_run_block(hosthandler, privilege),
             ModuleBlockExpectedState::LineInFile(block) => {
@@ -46,16 +46,25 @@ impl ModuleBlockExpectedState {
             ModuleBlockExpectedState::Yum(block) => block.dry_run_block(hosthandler, privilege),
         };
 
-        match mbchange {
-            StepChange::FailedToEvaluate(message) => {
-                if allowed_to_fail {
-                    return Ok((StepChange::AllowedFailure(message), allowed_to_fail));
-                } else {
-                    return Err(Error::FailedTaskDryRun(message));
-                }
-            }
-            _ => {
+        match mbchange_result {
+            Ok(mbchange) => {
                 return Ok((mbchange, allowed_to_fail));
+            }
+            Err(error_content) => {
+                match error_content {
+                    Error::FailedDryRunEvaluation(message) => {
+                        if allowed_to_fail {
+                            return Ok((StepChange::AllowedFailure(message), allowed_to_fail));
+                        } else {
+                            return Err(Error::FailedTaskDryRun(message));
+                        }
+                    }
+                    _ => {
+                        return Err(Error::AnyOtherError(
+                            "Module returned wrong Error type".to_string()
+                        ))
+                    }
+                }
             }
         }
     }
@@ -74,7 +83,7 @@ pub enum ModuleApiCall {
 }
 
 pub trait DryRun {
-    fn dry_run_block(&self, hosthandler: &mut HostHandler, privilege: Privilege) -> StepChange;
+    fn dry_run_block(&self, hosthandler: &mut HostHandler, privilege: Privilege) -> Result<StepChange, Error>;
 }
 
 pub trait Apply {

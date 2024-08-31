@@ -5,28 +5,37 @@ use crate::connection::hosthandler::HostHandler;
 use crate::connection::specification::Privilege;
 use crate::result::apicallresult::ApiCallResult;
 use crate::task::moduleblock::{Apply, DryRun};
+use crate::error::Error;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PingBlockExpectedState {}
 
 impl DryRun for PingBlockExpectedState {
-    fn dry_run_block(&self, hosthandler: &mut HostHandler, privilege: Privilege) -> StepChange {
+    fn dry_run_block(&self, hosthandler: &mut HostHandler, privilege: Privilege) -> Result<StepChange, Error> {
         let cmd = String::from("DEBIAN_FRONTEND=noninteractive id");
-        match hosthandler.run_cmd(cmd.as_str(), privilege) {
-            Ok(cmd_result) => {
-                if cmd_result.exitcode == 0 {
-                    return StepChange::AlreadyMatched("Host reachable".to_string());
-                } else {
-                    return StepChange::FailedToEvaluate("Host unreachable".to_string());
-                }
-            }
-            Err(e) => {
-                return StepChange::FailedToEvaluate(
-                    format!("{e:?}")
-                )
-            }
+        let cmd_result =  hosthandler.run_cmd(cmd.as_str(), privilege)?;
+
+        if cmd_result.exitcode == 0 {
+            return Ok(StepChange::AlreadyMatched("Host reachable".to_string()));
+        } else {
+            return Err(Error::FailedDryRunEvaluation(
+                "Host unreachable".to_string()));
         }
+        // match hosthandler.run_cmd(cmd.as_str(), privilege) {
+        //     Ok(cmd_result) => {
+        //         if cmd_result.exitcode == 0 {
+        //             return StepChange::AlreadyMatched("Host reachable".to_string());
+        //         } else {
+        //             return StepChange::FailedToEvaluate("Host unreachable".to_string());
+        //         }
+        //     }
+        //     Err(e) => {
+        //         return StepChange::FailedToEvaluate(
+        //             format!("{e:?}")
+        //         )
+        //     }
+        // }
     }
 }
 
