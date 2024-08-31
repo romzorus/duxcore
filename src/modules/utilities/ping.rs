@@ -13,12 +13,19 @@ pub struct PingBlockExpectedState {}
 impl DryRun for PingBlockExpectedState {
     fn dry_run_block(&self, hosthandler: &mut HostHandler, privilege: Privilege) -> StepChange {
         let cmd = String::from("DEBIAN_FRONTEND=noninteractive id");
-        let cmd_result = hosthandler.run_cmd(cmd.as_str(), privilege).unwrap();
-
-        if cmd_result.exitcode == 0 {
-            return StepChange::AlreadyMatched("Host reachable".to_string());
-        } else {
-            return StepChange::FailedToEvaluate("Host unreachable".to_string());
+        match hosthandler.run_cmd(cmd.as_str(), privilege) {
+            Ok(cmd_result) => {
+                if cmd_result.exitcode == 0 {
+                    return StepChange::AlreadyMatched("Host reachable".to_string());
+                } else {
+                    return StepChange::FailedToEvaluate("Host unreachable".to_string());
+                }
+            }
+            Err(e) => {
+                return StepChange::FailedToEvaluate(
+                    format!("{e:?}")
+                )
+            }
         }
     }
 }
