@@ -11,7 +11,7 @@ pub fn tasklist_parser(tasklistcontent: String, host: &Host) -> TaskList {
         Ok(mut parsed_content) => {
             for (taskindex, taskcontent) in parsed_content.clone().tasks.iter().enumerate() {
                 for (stepindex, _stepcontent) in taskcontent.steps.iter().enumerate() {
-                    let _ = parsed_content.tasks[taskindex].steps[stepindex].parsemodule();
+                    parsed_content.tasks[taskindex].steps[stepindex].parsemodule().unwrap();
                     // TODO : error handling required here
                 }
             }
@@ -25,7 +25,7 @@ pub fn tasklist_parser(tasklistcontent: String, host: &Host) -> TaskList {
                     for (taskindex, taskcontent) in parsed_content.clone().tasks.iter().enumerate()
                     {
                         for (stepindex, _stepcontent) in taskcontent.steps.iter().enumerate() {
-                            let _ = parsed_content.tasks[taskindex].steps[stepindex].parsemodule();
+                            parsed_content.tasks[taskindex].steps[stepindex].parsemodule().unwrap();
                             // TODO : error handling required here
                         }
                     }

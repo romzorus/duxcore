@@ -163,7 +163,7 @@ impl Ssh2HostHandler {
                 channel.exec(cmd).unwrap();
                 let mut s = String::new();
                 channel.read_to_string(&mut s).unwrap();
-                let _ = channel.wait_close();
+                channel.wait_close().unwrap();
         
                 return Ok(CmdResult {
                     exitcode: channel.exit_status().unwrap(),
