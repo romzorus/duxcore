@@ -101,46 +101,53 @@ impl Assignment {
                 self.changelist = changelist;
                 return Ok(());
             }
-            Err(e) => match &e {
-                Error::FailedTaskDryRun(message) => {
+            Err(e) => {
+                if let Error::FailedTaskDryRun(message) = &e {
                     self.finalstatus = AssignmentFinalStatus::FailedDryRun(message.clone());
-                    return Err(e);
                 }
-                _ => {
-                    return Err(e);
-                }
-            },
+                return Err(e);
+            }
+        
         }
     }
 
     // TODO : allow direct run with this method
-    pub fn apply(&mut self, hosthandler: &mut HostHandler) {
-        assert_eq!(self.runningmode, RunningMode::Apply);
-        assert_eq!(self.finalstatus, AssignmentFinalStatus::Unset);
+    pub fn apply(&mut self, hosthandler: &mut HostHandler) -> Result<(), Error> {
 
-        let tasklistresult = self.changelist.apply_changelist(hosthandler);
-        // "Save" the results
-        self.resultlist = tasklistresult.clone();
-
-        // Decide on the final status of the Assignment based on all the results
-        // -> Considered successfull unless it failed at some point
-        let mut finalstatus = AssignmentFinalStatus::Changed;
-        for taskresult in tasklistresult.taskresults.iter() {
-            for stepresult in taskresult.stepresults.as_ref().unwrap().iter() {
-                for apicallresult in stepresult.apicallresults.iter() {
-                    match apicallresult.status {
-                        ApiCallStatus::Failure(_) => {
-                            finalstatus = AssignmentFinalStatus::FailedChange;
+        if let RunningMode::Apply = self.runningmode {
+            if let AssignmentFinalStatus::Unset = self.finalstatus {
+                let tasklistresult = self.changelist.apply_changelist(hosthandler);
+                // "Save" the results
+                self.resultlist = tasklistresult.clone();
+        
+                // Decide on the final status of the Assignment based on all the results
+                // -> Considered successfull unless it failed at some point
+                self.finalstatus = AssignmentFinalStatus::Changed;
+                for taskresult in tasklistresult.taskresults.iter() {
+                    for stepresult in taskresult.stepresults.as_ref().unwrap().iter() {
+                        for apicallresult in stepresult.apicallresults.iter() {
+                            match apicallresult.status {
+                                ApiCallStatus::Failure(_) => {
+                                    self.finalstatus = AssignmentFinalStatus::FailedChange;
+                                    break;
+                                }
+                                ApiCallStatus::AllowedFailure(_) => {
+                                    self.finalstatus = AssignmentFinalStatus::ChangedWithFailures;
+                                    break;
+                                }
+                                _ => {}
+                            }
                         }
-                        ApiCallStatus::AllowedFailure(_) => {
-                            finalstatus = AssignmentFinalStatus::ChangedWithFailures;
-                        }
-                        _ => {}
                     }
                 }
+            } else {
+                return Err(Error::WrongInitialization);
             }
+        } else {
+            return Err(Error::WrongInitialization);
         }
-        self.finalstatus = finalstatus;
+
+        Ok(())
     }
 }
 
