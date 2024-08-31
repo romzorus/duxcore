@@ -29,17 +29,20 @@ impl CorrelationIdGenerator {
         match saltbuilding {
             Ok(salt) => {
                 self.salt = salt;
-                return Ok(());
             }
             Err(e) => {
                 return Err(Error::FailedInitialization(format!("{}", e)));
             }
         }
+
+        Ok(())
     }
 
     pub fn get_new_value(&mut self) -> Result<String, Error> {
         if self.salt.is_empty() {
-            return Err(Error::MissingInitialization);
+            return Err(Error::MissingInitialization(
+                "Salt is empty. Remember to initialize CorrelationIdGenerator before using it.".to_string()
+            ));
         } else {
             let now = SystemTime::now();
             let value = Sha256::digest(format!("{}{:?}", self.salt, now));

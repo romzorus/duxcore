@@ -44,7 +44,9 @@ pub struct HostHandler {
 impl HostHandler {
     pub fn from(hosthandlinginfo: &HostHandlingInfo) -> Result<HostHandler, Error> {
         match hosthandlinginfo.connectionmode {
-            ConnectionMode::Unset => Err(Error::MissingInitialization),
+            ConnectionMode::Unset => Err(Error::MissingInitialization(
+                "ConnectionMode is unset".to_string()
+            )),
             ConnectionMode::LocalHost => {
                 if let ConnectionDetails::LocalHost(localhostconnectiondetails) =
                     &hosthandlinginfo.connectiondetails
@@ -82,7 +84,9 @@ impl HostHandler {
     pub fn init(&mut self) -> Result<(), Error> {
         match self.connectionmode {
             ConnectionMode::Unset => {
-                return Err(Error::MissingInitialization);
+                return Err(Error::MissingInitialization(
+                    "ConnectionMode is unset".to_string()
+                ));
             }
             // Nothing to initialize when working on localhost
             ConnectionMode::LocalHost => {
@@ -95,7 +99,9 @@ impl HostHandler {
     // Use this to check if a command is available on target host
     pub fn is_this_cmd_available(&mut self, cmd: &str) -> Result<bool, Error> {
         match self.connectionmode {
-            ConnectionMode::Unset => Err(Error::MissingInitialization),
+            ConnectionMode::Unset => Err(Error::MissingInitialization(
+                "ConnectionMode is unset".to_string()
+            )),
             ConnectionMode::LocalHost => {
                 self.localhost.as_mut().unwrap().is_this_cmd_available(cmd)
             }
@@ -106,7 +112,9 @@ impl HostHandler {
     pub fn run_cmd(&mut self, cmd: &str, privilege: Privilege) -> Result<CmdResult, Error> {
         let final_cmd = final_cmd(cmd.to_string(), privilege.clone());
         match self.connectionmode {
-            ConnectionMode::Unset => Err(Error::MissingInitialization),
+            ConnectionMode::Unset => Err(Error::MissingInitialization(
+                "ConnectionMode is unset".to_string()
+            )),
             ConnectionMode::LocalHost => {
                 self.localhost.as_mut().unwrap().run_cmd(final_cmd.as_str())
             }

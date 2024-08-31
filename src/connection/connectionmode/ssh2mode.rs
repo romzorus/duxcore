@@ -62,7 +62,9 @@ impl Ssh2HostHandler {
 
     pub fn init(&mut self) -> Result<(), Error> {
         if self.authmode == Ssh2AuthMode::Unset {
-            return Err(Error::MissingInitialization);
+            return Err(Error::MissingInitialization(
+                "SSH2 authentication mode is unset".to_string()
+            ));
         } else {
             // TODO : add SSH custom port handling
             match TcpStream::connect(format!("{}:22", self.hostaddress)) {
@@ -149,21 +151,31 @@ impl Ssh2HostHandler {
     }
 
     pub fn run_cmd(&self, cmd: &str) -> Result<CmdResult, Error> {
-        assert!(
-            self.authmode != Ssh2AuthMode::Unset,
-            "Can't run command on remote host : authentication unset"
-        );
 
-        let mut channel = self.sshsession.channel_session().unwrap();
-        channel.exec(cmd).unwrap();
-        let mut s = String::new();
-        channel.read_to_string(&mut s).unwrap();
-        let _ = channel.wait_close();
+        if let Ssh2AuthMode::Unset = self.authmode {
+            return Err(Error::MissingInitialization(
+                "Can't run command on remote host : authentication unset".to_string()
+            ))
+        }
 
-        return Ok(CmdResult {
-            exitcode: channel.exit_status().unwrap(),
-            stdout: s,
-        });
+        match self.sshsession.channel_session() {
+            Ok(mut channel) => {
+                channel.exec(cmd).unwrap();
+                let mut s = String::new();
+                channel.read_to_string(&mut s).unwrap();
+                let _ = channel.wait_close();
+        
+                return Ok(CmdResult {
+                    exitcode: channel.exit_status().unwrap(),
+                    stdout: s,
+                });
+            }
+            Err(e) => {
+                return Err(Error::FailureToEstablishConnection(
+                    format!("{e}")
+                ));
+            }
+        }
     }
 }
 
