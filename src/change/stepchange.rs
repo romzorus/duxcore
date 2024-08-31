@@ -9,17 +9,12 @@ use serde::{Deserialize, Serialize};
 pub enum StepChange {
     AllowedFailure(String),
     AlreadyMatched(String),
-    FailedToEvaluate(String), // The module can't work on this host (trying to use yum/dnf on Debian for example)
     ModuleApiCalls(Vec<ModuleApiCall>),
 }
 
 impl StepChange {
     pub fn matched(message: &str) -> StepChange {
         StepChange::AlreadyMatched(message.to_string())
-    }
-
-    pub fn failed_to_evaluate(message: &str) -> StepChange {
-        StepChange::FailedToEvaluate(message.to_string())
     }
 
     pub fn changes(changes: Vec<ModuleApiCall>) -> StepChange {
@@ -32,9 +27,6 @@ impl StepChange {
                 return Vec::from([message.clone()]);
             }
             StepChange::AlreadyMatched(message) => {
-                return Vec::from([message.clone()]);
-            }
-            StepChange::FailedToEvaluate(message) => {
                 return Vec::from([message.clone()]);
             }
             StepChange::ModuleApiCalls(changeslist) => {
@@ -61,7 +53,6 @@ impl StepChange {
         match self {
             StepChange::AllowedFailure(_message) => return StepResult::none(),
             StepChange::AlreadyMatched(_message) => return StepResult::none(),
-            StepChange::FailedToEvaluate(_message) => return StepResult::none(),
             StepChange::ModuleApiCalls(changeslist) => {
                 let mut results: Vec<ApiCallResult> = Vec::new();
                 for change in changeslist {

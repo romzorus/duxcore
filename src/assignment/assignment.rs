@@ -74,23 +74,16 @@ impl Assignment {
                         let mut finalstatus = AssignmentFinalStatus::AlreadyMatched;
                         for taskchange in taskchangelist {
                             for step in taskchange.stepchanges.clone() {
-                                match step {
-                                    StepChange::FailedToEvaluate(e) => {
-                                        finalstatus = AssignmentFinalStatus::FailedDryRun(e);
-                                        break;
-                                    }
-                                    StepChange::ModuleApiCalls(apicalllist) => {
-                                        for apicall in apicalllist {
-                                            match apicall {
-                                                ModuleApiCall::None(_) => {}
-                                                _ => {
-                                                    finalstatus = AssignmentFinalStatus::Unset;
-                                                    break;
-                                                }
+                                if let StepChange::ModuleApiCalls(apicalllist) = step {
+                                    for apicall in apicalllist {
+                                        match apicall {
+                                            ModuleApiCall::None(_) => {}
+                                            _ => {
+                                                finalstatus = AssignmentFinalStatus::Unset;
+                                                break;
                                             }
                                         }
                                     }
-                                    _ => {}
                                 }
                             }
                         }

@@ -6,6 +6,7 @@ use crate::connection::specification::Privilege;
 use crate::result::apicallresult::{ApiCallResult, ApiCallStatus};
 use crate::task::moduleblock::ModuleApiCall;
 use crate::task::moduleblock::{Apply, DryRun};
+use crate::error::Error;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -17,7 +18,7 @@ pub struct YumDnfBlockExpectedState {
 
 #[allow(unused_assignments)] // 'tool' is never actually read, only borrowed
 impl DryRun for YumDnfBlockExpectedState {
-    fn dry_run_block(&self, hosthandler: &mut HostHandler, privilege: Privilege) -> StepChange {
+    fn dry_run_block(&self, hosthandler: &mut HostHandler, privilege: Privilege) -> Result<StepChange, Error> {
         let mut tool = String::new();
 
         if hosthandler.is_this_cmd_available("dnf").unwrap() {
@@ -25,7 +26,9 @@ impl DryRun for YumDnfBlockExpectedState {
         } else if hosthandler.is_this_cmd_available("yum").unwrap() {
             tool = String::from("yum");
         } else {
-            return StepChange::failed_to_evaluate("Neither YUM nor DNF work on this host");
+            return Err(Error::FailedDryRunEvaluation(
+                "Neither YUM nor DNF work on this host".to_string()
+            ));
         }
 
         let mut changes: Vec<ModuleApiCall> = Vec::new();
@@ -100,11 +103,11 @@ impl DryRun for YumDnfBlockExpectedState {
             match change {
                 ModuleApiCall::None(_) => {}
                 _ => {
-                    return StepChange::changes(changes);
+                    return Ok(StepChange::changes(changes));
                 }
             }
         }
-        return StepChange::matched("Package(s) already in expected state");
+        return Ok(StepChange::matched("Package(s) already in expected state"));
     }
 }
 
