@@ -152,4 +152,5 @@ pub enum AssignmentFinalStatus {
     Changed,
     ChangedWithFailures,
     FailedChange,
+    GenericFailed(String)
 }

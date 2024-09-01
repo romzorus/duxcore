@@ -34,6 +34,9 @@ pub fn display_output(assignment: Assignment) {
         AssignmentFinalStatus::FailedChange => {
             show_tasklistresult(assignment);
         }
+        AssignmentFinalStatus::GenericFailed(error) => {
+            println!("{}\n", error.red());
+        }
     }
 }
 
@@ -88,6 +91,9 @@ fn output_nice_finalstatus(finalstatus: &AssignmentFinalStatus) -> String {
         }
         AssignmentFinalStatus::AlreadyMatched => {
             return format!("{}", "Matched".green().bold());
+        }
+        AssignmentFinalStatus::GenericFailed(error) => {
+            return format!("{}", format!("Failed : {}", error).red().bold());
         }
     }
 }
