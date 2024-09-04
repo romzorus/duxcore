@@ -20,3 +20,4 @@ pub use crate::output::results::display_output;
 pub use crate::result::resultlist::ResultList;
 pub use crate::task::tasklist::RunningMode;
 pub use crate::task::tasklist::TaskList;
+pub use crate::task::tasklist::TaskListFileType;
