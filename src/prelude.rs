@@ -18,7 +18,5 @@ pub use crate::host::hosts::Host;
 pub use crate::host::parser::hostlist_parser;
 pub use crate::output::results::display_output;
 pub use crate::result::resultlist::ResultList;
-pub use crate::task::parser::parser::tasklist_get_from_file;
-pub use crate::task::parser::parser::tasklist_parser;
 pub use crate::task::tasklist::RunningMode;
 pub use crate::task::tasklist::TaskList;
