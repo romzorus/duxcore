@@ -59,9 +59,12 @@ impl ModuleBlockExpectedState {
                     }
                 }
                 _ => {
+                    // return Err(Error::AnyOtherError(
+                    //     "Module returned wrong Error type".to_string(),
+                    // ))
                     return Err(Error::AnyOtherError(
-                        "Module returned wrong Error type".to_string(),
-                    ))
+                        format!("Wrong error type : {:?}", error_content)
+                    ));
                 }
             },
         }
