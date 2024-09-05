@@ -66,7 +66,7 @@ impl Assignment {
     pub fn dry_run(&mut self, hosthandler: &mut HostHandler) -> Result<(), Error> {
         match self
             .tasklist
-            .dry_run_tasklist(self.correlationid.clone(), hosthandler)
+            .dry_run_tasklist(hosthandler)
         {
             Ok(changelist) => {
                 match &changelist.taskchanges {
