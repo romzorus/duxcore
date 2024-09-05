@@ -70,7 +70,6 @@ impl TaskList {
     }
     pub fn dry_run_tasklist(
         &self,
-        _correlationid: String,
         hosthandler: &mut HostHandler,
     ) -> Result<ChangeList, Error> {
         let mut list: Vec<TaskChange> = Vec::new();
