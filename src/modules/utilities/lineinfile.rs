@@ -3,10 +3,10 @@
 use crate::change::stepchange::StepChange;
 use crate::connection::hosthandler::HostHandler;
 use crate::connection::specification::Privilege;
+use crate::error::Error;
 use crate::result::apicallresult::{ApiCallResult, ApiCallStatus};
 use crate::task::moduleblock::ModuleApiCall;
 use crate::task::moduleblock::{Apply, DryRun};
-use crate::error::Error;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -24,10 +24,14 @@ pub struct LineInFileBlockExpectedState {
 }
 
 impl DryRun for LineInFileBlockExpectedState {
-    fn dry_run_block(&self, hosthandler: &mut HostHandler, privilege: Privilege) -> Result<StepChange, Error> {
+    fn dry_run_block(
+        &self,
+        hosthandler: &mut HostHandler,
+        privilege: Privilege,
+    ) -> Result<StepChange, Error> {
         if !hosthandler.is_this_cmd_available("sed").unwrap() {
             return Err(Error::FailedDryRunEvaluation(
-                "Sed command not available on this host".to_string()
+                "Sed command not available on this host".to_string(),
             ));
         }
 
@@ -39,9 +43,10 @@ impl DryRun for LineInFileBlockExpectedState {
             .unwrap();
 
         if file_exists_check.exitcode != 0 {
-            return Err(Error::FailedDryRunEvaluation(
-                format!("{} not found or not a regular file", self.filepath),
-            ));
+            return Err(Error::FailedDryRunEvaluation(format!(
+                "{} not found or not a regular file",
+                self.filepath
+            )));
         }
 
         let mut changes: Vec<ModuleApiCall> = Vec::new();

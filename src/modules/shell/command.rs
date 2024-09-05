@@ -3,10 +3,10 @@
 use crate::change::stepchange::StepChange;
 use crate::connection::hosthandler::HostHandler;
 use crate::connection::specification::Privilege;
+use crate::error::Error;
 use crate::result::apicallresult::{ApiCallResult, ApiCallStatus};
 use crate::task::moduleblock::ModuleApiCall;
 use crate::task::moduleblock::{Apply, DryRun};
-use crate::error::Error;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -15,7 +15,11 @@ pub struct CommandBlockExpectedState {
 }
 
 impl DryRun for CommandBlockExpectedState {
-    fn dry_run_block(&self, _hosthandler: &mut HostHandler, privilege: Privilege) -> Result<StepChange, Error> {
+    fn dry_run_block(
+        &self,
+        _hosthandler: &mut HostHandler,
+        privilege: Privilege,
+    ) -> Result<StepChange, Error> {
         let mut changes: Vec<ModuleApiCall> = Vec::new();
 
         match &self.content {

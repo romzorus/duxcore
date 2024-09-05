@@ -3,10 +3,10 @@
 use crate::change::stepchange::StepChange;
 use crate::connection::hosthandler::HostHandler;
 use crate::connection::specification::Privilege;
+use crate::error::Error;
 use crate::result::apicallresult::{ApiCallResult, ApiCallStatus};
 use crate::task::moduleblock::ModuleApiCall;
 use crate::task::moduleblock::{Apply, DryRun};
-use crate::error::Error;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -17,12 +17,16 @@ pub struct ServiceBlockExpectedState {
 }
 
 impl DryRun for ServiceBlockExpectedState {
-    fn dry_run_block(&self, hosthandler: &mut HostHandler, privilege: Privilege) -> Result<StepChange, Error> {
+    fn dry_run_block(
+        &self,
+        hosthandler: &mut HostHandler,
+        privilege: Privilege,
+    ) -> Result<StepChange, Error> {
         // Prechecks
 
         if !hosthandler.is_this_cmd_available("systemctl").unwrap() {
             return Err(Error::FailedDryRunEvaluation(
-                "SYSTEMCTL not available on this host".to_string()
+                "SYSTEMCTL not available on this host".to_string(),
             ));
         }
 
@@ -45,7 +49,7 @@ impl DryRun for ServiceBlockExpectedState {
         if let (None, None) = (&self.state, &self.enabled) {
             // PROBLEM : both 'state' and 'enabled' are empty
             return Err(Error::FailedDryRunEvaluation(
-                "STATE and ENABLED fields are both empty in provided Task List".to_string()
+                "STATE and ENABLED fields are both empty in provided Task List".to_string(),
             ));
         } else {
             match &self.state {

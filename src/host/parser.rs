@@ -1,6 +1,6 @@
+use crate::error::Error;
 use crate::host::hostlist::{find_host_in_list, HostList};
 use crate::host::hosts::{Group, Host};
-use crate::error::Error;
 use serde::Deserialize;
 use std::collections::HashMap;
 
@@ -188,9 +188,7 @@ pub fn hostlist_parser(hostlistfilecontent: &str) -> Result<HostList, Error> {
             return Ok(host_vars_parsed_result.generate_hostlist());
         }
         Err(error) => {
-            return Err(Error::FailedInitialization(
-                format!("{}", error)
-            ));
+            return Err(Error::FailedInitialization(format!("{}", error)));
         }
     };
 }

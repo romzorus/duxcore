@@ -63,7 +63,7 @@ impl Ssh2HostHandler {
     pub fn init(&mut self) -> Result<(), Error> {
         if self.authmode == Ssh2AuthMode::Unset {
             return Err(Error::MissingInitialization(
-                "SSH2 authentication mode is unset".to_string()
+                "SSH2 authentication mode is unset".to_string(),
             ));
         } else {
             // TODO : add SSH custom port handling
@@ -151,11 +151,10 @@ impl Ssh2HostHandler {
     }
 
     pub fn run_cmd(&self, cmd: &str) -> Result<CmdResult, Error> {
-
         if let Ssh2AuthMode::Unset = self.authmode {
             return Err(Error::MissingInitialization(
-                "Can't run command on remote host : authentication unset".to_string()
-            ))
+                "Can't run command on remote host : authentication unset".to_string(),
+            ));
         }
 
         match self.sshsession.channel_session() {
@@ -164,16 +163,14 @@ impl Ssh2HostHandler {
                 let mut s = String::new();
                 channel.read_to_string(&mut s).unwrap();
                 channel.wait_close().unwrap();
-        
+
                 return Ok(CmdResult {
                     exitcode: channel.exit_status().unwrap(),
                     stdout: s,
                 });
             }
             Err(e) => {
-                return Err(Error::FailureToEstablishConnection(
-                    format!("{e}")
-                ));
+                return Err(Error::FailureToEstablishConnection(format!("{e}")));
             }
         }
     }
@@ -185,5 +182,5 @@ pub enum Ssh2AuthMode {
     UsernamePassword(Credentials),
     KeyFile((String, PathBuf)), // (username, private key's path)
     KeyMemory((String, Pem)),   // (username, PEM encoded key from memory)
-    Agent(String),           // Name of SSH agent
+    Agent(String),              // Name of SSH agent
 }

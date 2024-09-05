@@ -3,10 +3,10 @@
 use crate::change::stepchange::StepChange;
 use crate::connection::hosthandler::HostHandler;
 use crate::connection::specification::Privilege;
+use crate::error::Error;
 use crate::result::apicallresult::{ApiCallResult, ApiCallStatus};
 use crate::task::moduleblock::ModuleApiCall;
 use crate::task::moduleblock::{Apply, DryRun};
-use crate::error::Error;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -17,12 +17,16 @@ pub struct AptBlockExpectedState {
 }
 
 impl DryRun for AptBlockExpectedState {
-    fn dry_run_block(&self, hosthandler: &mut HostHandler, privilege: Privilege) -> Result<StepChange, Error> {
+    fn dry_run_block(
+        &self,
+        hosthandler: &mut HostHandler,
+        privilege: Privilege,
+    ) -> Result<StepChange, Error> {
         if !hosthandler.is_this_cmd_available("apt-get").unwrap()
             || !hosthandler.is_this_cmd_available("dpkg").unwrap()
         {
             return Err(Error::FailedDryRunEvaluation(
-                "APT not working on this host".to_string()
+                "APT not working on this host".to_string(),
             ));
         }
 
@@ -124,9 +128,9 @@ impl Apply for AptApiCall {
         match self.action.as_str() {
             "install" => {
                 hosthandler
-                .run_cmd("apt-get update", self.privilege.clone())
-                .unwrap();
-            
+                    .run_cmd("apt-get update", self.privilege.clone())
+                    .unwrap();
+
                 let cmd = format!(
                     "DEBIAN_FRONTEND=noninteractive apt-get install -y {}",
                     self.package.clone().unwrap()

@@ -59,7 +59,9 @@ impl StepChange {
                     let apicallresult = match change {
                         ModuleApiCall::None(_) => ApiCallResult::none(),
                         // **BEACON_2**
-                        ModuleApiCall::Service(block) => block.apply_moduleblock_change(hosthandler),
+                        ModuleApiCall::Service(block) => {
+                            block.apply_moduleblock_change(hosthandler)
+                        }
                         ModuleApiCall::LineInFile(block) => {
                             block.apply_moduleblock_change(hosthandler)
                         }

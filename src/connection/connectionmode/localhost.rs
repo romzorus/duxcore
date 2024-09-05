@@ -39,12 +39,9 @@ impl LocalHostHandler {
     }
 
     pub fn is_this_cmd_available(&self, cmd: &str) -> Result<bool, Error> {
-
         let check_cmd_result = Command::new("sh")
             .arg("-c")
-            .arg (format!(
-                "command -v {}", cmd
-            ))
+            .arg(format!("command -v {}", cmd))
             .output();
 
         match check_cmd_result {
@@ -62,34 +59,23 @@ impl LocalHostHandler {
     }
 
     pub fn run_cmd(&self, cmd: &str) -> Result<CmdResult, Error> {
-
         let result = match &self.user {
-            WhichUser::CurrentUser => {
-
-                Command::new("sh")
-                    .arg("-c")
-                    .arg(cmd)
-                    .output()
-            }
-            WhichUser::PasswordLessUser(username) => {
-
-                Command::new("su")
-                    .arg("-")
-                    .arg(username)
-                    .arg("-c")
-                    .arg("sh")
-                    .arg("-c")
-                    .arg(cmd)
-                    .output()
-            }
+            WhichUser::CurrentUser => Command::new("sh").arg("-c").arg(cmd).output(),
+            WhichUser::PasswordLessUser(username) => Command::new("su")
+                .arg("-")
+                .arg(username)
+                .arg("-c")
+                .arg("sh")
+                .arg("-c")
+                .arg(cmd)
+                .output(),
             WhichUser::UsernamePassword(credentials) => {
+                let command_content = format!(
+                    "echo \"{}\" | su - {} -c \"{}\"",
+                    credentials.password, credentials.username, cmd
+                );
 
-                let command_content = format!("echo \"{}\" | su - {} -c \"{}\"", credentials.password, credentials.username, cmd);
-
-                Command::new("sh")
-                    .arg("-c")
-                    .arg(command_content)
-                    .output()
+                Command::new("sh").arg("-c").arg(command_content).output()
             }
         };
 

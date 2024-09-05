@@ -3,10 +3,10 @@
 use crate::change::stepchange::StepChange;
 use crate::connection::hosthandler::HostHandler;
 use crate::connection::specification::Privilege;
+use crate::error::Error;
 use crate::result::apicallresult::{ApiCallResult, ApiCallStatus};
 use crate::task::moduleblock::ModuleApiCall;
 use crate::task::moduleblock::{Apply, DryRun};
-use crate::error::Error;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -18,7 +18,11 @@ pub struct YumDnfBlockExpectedState {
 
 #[allow(unused_assignments)] // 'tool' is never actually read, only borrowed
 impl DryRun for YumDnfBlockExpectedState {
-    fn dry_run_block(&self, hosthandler: &mut HostHandler, privilege: Privilege) -> Result<StepChange, Error> {
+    fn dry_run_block(
+        &self,
+        hosthandler: &mut HostHandler,
+        privilege: Privilege,
+    ) -> Result<StepChange, Error> {
         let mut tool = String::new();
 
         if hosthandler.is_this_cmd_available("dnf").unwrap() {
@@ -27,7 +31,7 @@ impl DryRun for YumDnfBlockExpectedState {
             tool = String::from("yum");
         } else {
             return Err(Error::FailedDryRunEvaluation(
-                "Neither YUM nor DNF work on this host".to_string()
+                "Neither YUM nor DNF work on this host".to_string(),
             ));
         }
 

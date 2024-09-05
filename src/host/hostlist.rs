@@ -1,6 +1,6 @@
+use crate::error::Error;
 use crate::host::hosts::Host;
 use crate::host::parser::hostlist_parser;
-use crate::error::Error;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize, Clone)]
@@ -19,9 +19,10 @@ impl HostList {
                 return HostList::from_str(&file_content);
             }
             Err(error) => {
-                return Err(Error::FailedInitialization(
-                    format!("{} : {}", file_path, error)
-                ));
+                return Err(Error::FailedInitialization(format!(
+                    "{} : {}",
+                    file_path, error
+                )));
             }
         }
     }

@@ -15,5 +15,5 @@ pub enum Error {
     GroupNotFound,
     MissingGroupsList,
     WrongInitialization,
-    AnyOtherError(String)
+    AnyOtherError(String),
 }

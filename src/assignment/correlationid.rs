@@ -41,7 +41,8 @@ impl CorrelationIdGenerator {
     pub fn get_new_value(&mut self) -> Result<String, Error> {
         if self.salt.is_empty() {
             return Err(Error::MissingInitialization(
-                "Salt is empty. Remember to initialize CorrelationIdGenerator before using it.".to_string()
+                "Salt is empty. Remember to initialize CorrelationIdGenerator before using it."
+                    .to_string(),
             ));
         } else {
             let now = SystemTime::now();

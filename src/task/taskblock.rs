@@ -3,7 +3,7 @@ use crate::change::taskchange::TaskChange;
 use crate::connection::hosthandler::HostHandler;
 use crate::connection::specification::Privilege;
 use crate::error::Error;
-use crate::task::step::Step;
+use crate::task::step::{ParsingStep, Step};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -53,7 +53,7 @@ impl TaskBlock {
                 }
             };
 
-            match step.moduleblock.unwrap().dry_run_moduleblock(
+            match step.moduleblock.dry_run_moduleblock(
                 hosthandler,
                 privilege,
                 step.allowed_to_fail.unwrap_or(false),
@@ -69,5 +69,34 @@ impl TaskBlock {
         }
 
         return Ok(TaskChange::from(mbchangeslist, allowed_failures));
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ParsingTaskBlock {
+    pub name: Option<String>,
+    pub steps: Vec<ParsingStep>,
+    pub with_sudo: Option<bool>,
+}
+
+impl ParsingTaskBlock {
+    pub fn parse_task_block(&self) -> Result<TaskBlock, Error> {
+        let mut steps: Vec<Step> = Vec::new();
+        for parsing_step in self.steps.iter() {
+            match parsing_step.parsemodule() {
+                Ok(step) => {
+                    steps.push(step);
+                }
+                Err(error) => {
+                    return Err(error);
+                }
+            }
+        }
+
+        Ok(TaskBlock {
+            name: self.name.clone(),
+            steps: steps,
+            with_sudo: self.with_sudo.clone(),
+        })
     }
 }

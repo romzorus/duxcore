@@ -100,19 +100,17 @@ impl Assignment {
                 }
                 return Err(e);
             }
-        
         }
     }
 
     // TODO : allow direct run with this method
     pub fn apply(&mut self, hosthandler: &mut HostHandler) -> Result<(), Error> {
-
         if let RunningMode::Apply = self.runningmode {
             if let AssignmentFinalStatus::Unset = self.finalstatus {
                 let tasklistresult = self.changelist.apply_changelist(hosthandler);
                 // "Save" the results
                 self.resultlist = tasklistresult.clone();
-        
+
                 // Decide on the final status of the Assignment based on all the results
                 // -> Considered successfull unless it failed at some point
                 self.finalstatus = AssignmentFinalStatus::Changed;
@@ -152,5 +150,5 @@ pub enum AssignmentFinalStatus {
     Changed,
     ChangedWithFailures,
     FailedChange,
-    GenericFailed(String)
+    GenericFailed(String),
 }

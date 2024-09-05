@@ -50,22 +50,20 @@ impl ModuleBlockExpectedState {
             Ok(mbchange) => {
                 return Ok((mbchange, allowed_to_fail));
             }
-            Err(error_content) => {
-                match error_content {
-                    Error::FailedDryRunEvaluation(message) => {
-                        if allowed_to_fail {
-                            return Ok((StepChange::AllowedFailure(message), allowed_to_fail));
-                        } else {
-                            return Err(Error::FailedTaskDryRun(message));
-                        }
-                    }
-                    _ => {
-                        return Err(Error::AnyOtherError(
-                            "Module returned wrong Error type".to_string()
-                        ))
+            Err(error_content) => match error_content {
+                Error::FailedDryRunEvaluation(message) => {
+                    if allowed_to_fail {
+                        return Ok((StepChange::AllowedFailure(message), allowed_to_fail));
+                    } else {
+                        return Err(Error::FailedTaskDryRun(message));
                     }
                 }
-            }
+                _ => {
+                    return Err(Error::AnyOtherError(
+                        "Module returned wrong Error type".to_string(),
+                    ))
+                }
+            },
         }
     }
 }
@@ -83,7 +81,11 @@ pub enum ModuleApiCall {
 }
 
 pub trait DryRun {
-    fn dry_run_block(&self, hosthandler: &mut HostHandler, privilege: Privilege) -> Result<StepChange, Error>;
+    fn dry_run_block(
+        &self,
+        hosthandler: &mut HostHandler,
+        privilege: Privilege,
+    ) -> Result<StepChange, Error>;
 }
 
 pub trait Apply {
