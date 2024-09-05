@@ -43,6 +43,21 @@ impl Host {
             }
         }
     }
+
+    pub fn add_var(&mut self, key: &str, value: &str) {
+        match &self.vars {
+            Some(oldvars) => {
+                let mut new_vars_list = oldvars.clone();
+                new_vars_list.insert(key.into(), value.into());
+                self.vars = Some(new_vars_list);
+            }
+            None => {
+                let mut new_vars = HashMap::new();
+                new_vars.insert(key.into(), value.into());
+                self.vars = Some(new_vars);
+            }
+        }
+    }
 }
 
 #[derive(Debug, Deserialize, Clone)]
