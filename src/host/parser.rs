@@ -1,5 +1,6 @@
 use crate::host::hostlist::{find_host_in_list, HostList};
 use crate::host::hosts::{Group, Host};
+use crate::error::Error;
 use serde::Deserialize;
 use std::collections::HashMap;
 
@@ -177,12 +178,19 @@ impl HostListFile {
 }
 
 // TODO : So far, we assume the hostlist file is in YAML format. More formats will come later.
-pub fn hostlist_parser(hostlistfilecontent: String) -> HostList {
+pub fn hostlist_parser(hostlistfilecontent: &str) -> Result<HostList, Error> {
     // First we parse the content as YAML, host vars not parsed yet (unproper YAML syntax)
-    let yaml_parsed_result: HostListVarsUnparsed =
-        serde_yaml::from_str(&hostlistfilecontent).unwrap();
-    // Second we parse the host vars
-    let host_vars_parsed_result = yaml_parsed_result.parse_host_vars();
-    // Finally, we generate a HostList out of the HostListFile
-    host_vars_parsed_result.generate_hostlist()
+    match serde_yaml::from_str::<HostListVarsUnparsed>(&hostlistfilecontent) {
+        Ok(yaml_parsed_result) => {
+            // Second we parse the host vars
+            let host_vars_parsed_result = yaml_parsed_result.parse_host_vars();
+            // Finally, we generate a HostList out of the HostListFile
+            return Ok(host_vars_parsed_result.generate_hostlist());
+        }
+        Err(error) => {
+            return Err(Error::FailedInitialization(
+                format!("{}", error)
+            ));
+        }
+    };
 }

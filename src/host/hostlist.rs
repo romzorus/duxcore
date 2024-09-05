@@ -1,9 +1,30 @@
 use crate::host::hosts::Host;
+use crate::host::parser::hostlist_parser;
+use crate::error::Error;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct HostList {
     pub hosts: Option<Vec<Host>>,
+}
+
+impl HostList {
+    pub fn from_str(raw_content: &str) -> Result<HostList, Error> {
+        hostlist_parser(raw_content)
+    }
+
+    pub fn from_file(file_path: &str) -> Result<HostList, Error> {
+        match std::fs::read_to_string(file_path) {
+            Ok(file_content) => {
+                return HostList::from_str(&file_content);
+            }
+            Err(error) => {
+                return Err(Error::FailedInitialization(
+                    format!("{} : {}", file_path, error)
+                ));
+            }
+        }
+    }
 }
 
 pub fn hostlist_get_all_hosts(hostlist: &HostList) -> Option<Vec<String>> {
