@@ -34,7 +34,8 @@ use std::path::PathBuf;
 fn main() {
     // First we define all required components :
     // --> a 'Host'
-    let target_host = Host::from_string("host-address".into());
+    let mut target_host = Host::from_string("host-address".into());
+    target_host.add_var("package_name", "apache2");
 
     // --> connection details
     let ssh2_connection_details = Ssh2ConnectionDetails::from(
@@ -60,7 +61,7 @@ fn main() {
     - name: Package installation
       with_sudo: true
       apt:
-        package: apache2
+        package: \"{{ package_name }}\"
         state: present
 
     - name: Start and enable the service
