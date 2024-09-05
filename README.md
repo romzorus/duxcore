@@ -21,49 +21,83 @@ Based on Rust's type system, the workflow is as follows :
 
 
 # Usage
+Import the crate
+
+```shell
+cargo add duxcore
+```
+Now let's perform the usual example : **setup a webserver** (but, this time, right from your Rust code !)
 ```rust
 use duxcore::prelude::*;
+use std::path::PathBuf;
 
-// Build a HostList : list of target hosts
-let hostlist: Hostlist = hostlist_parser(
-    hostlist_get_from_file("/path/to/my/hostlist.yaml")
-);
+fn main() {
+    // First we define all required components :
+    // --> a 'Host'
+    let target_host = Host::from_string("host-address".into());
 
-// Build a TaskList per host (host-specific variables taken into account)
-let tasklist: TaskList = tasklist_parser(
-    tasklist_get_from_file("/path/to/my/tasklist.yaml"),
-    &host
-);
+    // --> connection details
+    let ssh2_connection_details = Ssh2ConnectionDetails::from(
+        target_host.address.clone(),
+        Ssh2AuthMode::KeyFile((
+            "username".into(),
+            PathBuf::from("/path/to/private/key"),
+        )),
+    );
 
-// Build an Assignment per host
-let assignment = Assignment::from(
-    correlationid: correlationid.get_new_value().unwrap(),
-    runningmode: RunningMode::Apply, // Do we want to actually perform automation or just check the delta between what is and what we want
-    host: host.address.clone(),
-    hosthandlinginfo: HostHandlingInfo::from(...), // Using information about hosts, connection mode, credentials...,
-    variables: HashMap::new(),
-    tasklist: tasklist.clone(),
-    changelist: ChangeList::new(),
-    resultlist: ResultList::new(),
-    finalstatus: AssignmentFinalStatus::Unset,
-);
+    // --> a 'HostHandler' based on a Host and its connection details
+    let mut host_handler = HostHandler::from(&HostHandlingInfo::from(
+        ConnectionMode::Ssh2,
+        target_host.address.clone(),
+        ConnectionDetails::Ssh2(ssh2_connection_details),
+    ))
+    .unwrap();
 
-// Build a HostHandler : struct required to connect to the host
-// (not included in Assignment since it's not serializable for now)
-let mut hosthandler = HostHandler::from(&assignment.hosthandlinginfo).unwrap();
+    // --> a 'TaskList' describing the expected state of this host
+    let tasklist_content = "
+- name: Install apache web server
+  steps:
+    - name: Package installation
+      with_sudo: true
+      apt:
+        package: apache2
+        state: present
 
-// Dry run the Assignment
-let dry_run_result = assignment.dry_run(&mut hosthandler); // -> 
+    - name: Start and enable the service
+      with_sudo: true
+      service:
+        name: apache2
+        state: started
+        enabled: true
+    
+    - name: Finally, enable some website
+      with_sudo: true
+      command:
+        content: a2ensite /path/to/my/site/configuration/file";
 
-// Apply the changes required to meet the expected state of the host
-let applied_assignment_result = assignment.apply(&mut hosthandler);
+    let task_list: TaskList = TaskList::from_str(
+        tasklist_content,
+        TaskListFileType::Yaml,
+        &target_host) // 'Host' is given to take variables into account
+        .unwrap();
 
+    // Then we actually use them :
+    // --> SSH2 connection needs to be initialized
+    host_handler.init();
+
+    // --> Evaluate what needs to be done on the host to meet the expected state
+    let mut change_list: ChangeList = task_list.dry_run_tasklist(&mut host_handler).unwrap();
+
+    // --> Apply the required changes and have the host reach the expected state
+    // Won't do anything (not even try to connect) if 'ChangeList' is empty (meaning the host is already in the expected state)
+    let result_list: ResultList = change_list.apply_changelist(&mut host_handler);
+}
 ```
+This is the basic workflow of Dux. It is up to you to parallelize, distribute the work, display the results in some web interface or send them in a RabbitMQ queue... Whatever suits you best ! The whole point is to let you adapt this automation engine to the context of your already-existing infrastructure. Adapt the tool to the job !
 
+# More examples
 
-# Examples
-
-Examples of how the Dux crate can be used are being built as separate projects. These are proofs of concept and can be used as a starting point for your own implementation. You can also start from scratch.
+More complex examples of how the Dux crate can be used are being built as separate projects. These are **proofs of concept** and can be used as a starting point for your own implementation. You can also start from scratch.
 
 ## Standard implementation
 > One binary doing everything
