@@ -7,22 +7,19 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TaskChange {
-    pub stepchanges: Vec<StepChange>,
-    pub allowed_failures: Vec<bool>,
+    pub stepchanges: Vec<StepChange>
 }
 
 impl TaskChange {
     pub fn new() -> TaskChange {
         TaskChange {
-            stepchanges: Vec::new(),
-            allowed_failures: Vec::new(),
+            stepchanges: Vec::new()
         }
     }
 
-    pub fn from(stepchanges: Vec<StepChange>, allowed_failures: Vec<bool>) -> TaskChange {
+    pub fn from(stepchanges: Vec<StepChange>) -> TaskChange {
         TaskChange {
-            stepchanges,
-            allowed_failures,
+            stepchanges
         }
     }
 
@@ -35,30 +32,30 @@ impl TaskChange {
             // Change Failures into AllowedFailures before pushing to stepresults
             // It is done at this level and not at module level so modules don't have to bother with upper level logic.
             // We just want modules to return Failures when they fail, nothing more.
-            if self.allowed_failures[mbindex] {
-                for (index, apicallresult) in moduleblockresultlist
-                    .apicallresults
-                    .clone()
-                    .iter()
-                    .enumerate()
-                {
-                    if let ApiCallStatus::Failure(message) = &apicallresult.status {
-                        moduleblockresultlist.apicallresults[index].status =
-                            ApiCallStatus::AllowedFailure(message.to_string());
-                    }
-                }
-                stepresults.push(moduleblockresultlist.clone());
-            } else {
-                stepresults.push(moduleblockresultlist.clone());
-                // If a failure is encountered in a step, stop the "apply" there.
-                if !self.allowed_failures[mbindex] {
-                    for apicallresult in moduleblockresultlist.apicallresults.into_iter() {
-                        if let ApiCallStatus::Failure(_) = apicallresult.status {
-                            return TaskResult::from(Some(stepresults));
-                        }
-                    }
-                }
-            }
+        //     if self.allowed_failures[mbindex] {
+        //         for (index, apicallresult) in moduleblockresultlist
+        //             .apicallresults
+        //             .clone()
+        //             .iter()
+        //             .enumerate()
+        //         {
+        //             if let ApiCallStatus::Failure(message) = &apicallresult.status {
+        //                 moduleblockresultlist.apicallresults[index].status =
+        //                     ApiCallStatus::AllowedFailure(message.to_string());
+        //             }
+        //         }
+        //         stepresults.push(moduleblockresultlist.clone());
+        //     } else {
+        //         stepresults.push(moduleblockresultlist.clone());
+        //         // If a failure is encountered in a step, stop the "apply" there.
+        //         if !self.allowed_failures[mbindex] {
+        //             for apicallresult in moduleblockresultlist.apicallresults.into_iter() {
+        //                 if let ApiCallStatus::Failure(_) = apicallresult.status {
+        //                     return TaskResult::from(Some(stepresults));
+        //                 }
+        //             }
+        //         }
+        //     }
         }
         return TaskResult::from(Some(stepresults));
     }

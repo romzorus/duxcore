@@ -68,10 +68,7 @@ impl TaskList {
             }
         }
     }
-    pub fn dry_run_tasklist(
-        &self,
-        hosthandler: &mut HostHandler,
-    ) -> Result<ChangeList, Error> {
+    pub fn dry_run_tasklist(&self, hosthandler: &mut HostHandler) -> Result<ChangeList, Error> {
         let mut list: Vec<TaskChange> = Vec::new();
 
         for taskcontent in self.tasks.clone().iter() {

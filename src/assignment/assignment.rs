@@ -64,10 +64,7 @@ impl Assignment {
     }
 
     pub fn dry_run(&mut self, hosthandler: &mut HostHandler) -> Result<(), Error> {
-        match self
-            .tasklist
-            .dry_run_tasklist(hosthandler)
-        {
+        match self.tasklist.dry_run_tasklist(hosthandler) {
             Ok(changelist) => {
                 match &changelist.taskchanges {
                     Some(taskchangelist) => {

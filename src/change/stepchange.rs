@@ -7,7 +7,6 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum StepChange {
-    AllowedFailure(String),
     AlreadyMatched(String),
     ModuleApiCalls(Vec<ModuleApiCall>),
 }
@@ -23,9 +22,6 @@ impl StepChange {
 
     pub fn display(&self) -> Vec<String> {
         match self {
-            StepChange::AllowedFailure(message) => {
-                return Vec::from([message.clone()]);
-            }
             StepChange::AlreadyMatched(message) => {
                 return Vec::from([message.clone()]);
             }
@@ -51,7 +47,6 @@ impl StepChange {
 
     pub fn apply_moduleblockchange(&self, hosthandler: &mut HostHandler) -> StepResult {
         match self {
-            StepChange::AllowedFailure(_message) => return StepResult::none(),
             StepChange::AlreadyMatched(_message) => return StepResult::none(),
             StepChange::ModuleApiCalls(changeslist) => {
                 let mut results: Vec<ApiCallResult> = Vec::new();

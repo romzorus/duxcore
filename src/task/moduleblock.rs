@@ -30,8 +30,7 @@ impl ModuleBlockExpectedState {
         &self,
         hosthandler: &mut HostHandler,
         privilege: Privilege,
-        allowed_to_fail: bool,
-    ) -> Result<(StepChange, bool), Error> {
+    ) -> Result<StepChange, Error> {
         let mbchange_result: Result<StepChange, Error> = match &self {
             ModuleBlockExpectedState::None => Ok(StepChange::matched("none")),
             // **BEACON_3**
@@ -46,28 +45,7 @@ impl ModuleBlockExpectedState {
             ModuleBlockExpectedState::Yum(block) => block.dry_run_block(hosthandler, privilege),
         };
 
-        match mbchange_result {
-            Ok(mbchange) => {
-                return Ok((mbchange, allowed_to_fail));
-            }
-            Err(error_content) => match error_content {
-                Error::FailedDryRunEvaluation(message) => {
-                    if allowed_to_fail {
-                        return Ok((StepChange::AllowedFailure(message), allowed_to_fail));
-                    } else {
-                        return Err(Error::FailedTaskDryRun(message));
-                    }
-                }
-                _ => {
-                    // return Err(Error::AnyOtherError(
-                    //     "Module returned wrong Error type".to_string(),
-                    // ))
-                    return Err(Error::AnyOtherError(
-                        format!("Wrong error type : {:?}", error_content)
-                    ));
-                }
-            },
-        }
+        mbchange_result
     }
 }
 
