@@ -21,3 +21,4 @@ pub use crate::result::resultlist::ResultList;
 pub use crate::task::tasklist::RunningMode;
 pub use crate::task::tasklist::TaskList;
 pub use crate::task::tasklist::TaskListFileType;
+pub use crate::workflow::hostworkflow::{HostWorkFlow, Context};
