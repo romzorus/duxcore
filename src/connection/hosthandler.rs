@@ -36,9 +36,9 @@ impl HostHandlingInfo {
 
 #[derive(Clone)]
 pub struct HostHandler {
-    connectionmode: ConnectionMode,
-    localhost: Option<LocalHostHandler>,
-    ssh2: Option<Ssh2HostHandler>,
+    pub connectionmode: ConnectionMode,
+    pub localhost: Option<LocalHostHandler>,
+    pub ssh2: Option<Ssh2HostHandler>,
 }
 
 impl HostHandler {
