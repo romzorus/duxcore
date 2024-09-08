@@ -42,6 +42,13 @@ pub struct HostHandler {
 }
 
 impl HostHandler {
+    pub fn new() -> HostHandler {
+        HostHandler {
+            connectionmode: ConnectionMode::Unset,
+            localhost: None,
+            ssh2: None
+        }
+    }
     pub fn from(hosthandlinginfo: &HostHandlingInfo) -> Result<HostHandler, Error> {
         match hosthandlinginfo.connectionmode {
             ConnectionMode::Unset => Err(Error::MissingInitialization(
