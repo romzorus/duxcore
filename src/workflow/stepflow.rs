@@ -5,6 +5,7 @@ use crate::result::stepresult::StepResult;
 use crate::connection::hosthandler::HostHandler;
 use crate::connection::specification::Privilege;
 use crate::result::apicallresult::ApiCallStatus;
+use crate::workflow::hostworkflow::Context;
 
 #[derive(Debug, Clone)]
 pub struct StepFlow {
@@ -70,13 +71,21 @@ impl StepFlow {
 
         Ok(())
     }
-    pub fn apply(&mut self, hosthandler: &mut HostHandler) -> Result<(), Error> {
+    pub fn apply(&mut self, hosthandler: &mut HostHandler, context: &mut Context) -> Result<(), Error> {
         // Check that dry_run performed first
         match self.step_status {
-            StepStatus::NotRunYet => {} // Error
+            StepStatus::NotRunYet => {
+                return Err(Error::WorkFlowNotFollowed(
+                    "Trying to apply a change list but dry_run not run yet. Please run dry_run step before trying to apply.".into()
+                ))
+            }
             StepStatus::ApplySuccessful
             | StepStatus::ApplyFailedButAllowed
-            | StepStatus::ApplyFailed => {} // Error
+            | StepStatus::ApplyFailed => {
+                return Err(Error::WorkFlowNotFollowed(
+                    "Trying to apply an already-applied step".into()
+                ))
+            }
             StepStatus::AlreadyMatched => {
                 return Ok(());
             }
@@ -99,10 +108,19 @@ impl StepFlow {
                                 _ => {}
                             }
                         }
+
+                        if let Some(variable_name) = &self.step_expected.register {
+                            context.vars.insert(variable_name.into(), result.apicallresults[0].output.clone().unwrap());
+                        }
+
                         self.step_status = step_status;
                         self.step_result = Some(result);
                     }
-                    None => {} // Error
+                    None => {
+                        return Err(Error::WorkFlowNotFollowed(
+                            "StepStatus = ChangeRequired but StepChange is empty. Something needs to be done but no information on what to do is provided.".into()
+                        ))
+                    }
                 }
             }
         }

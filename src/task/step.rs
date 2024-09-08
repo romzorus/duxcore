@@ -9,6 +9,7 @@ pub struct Step {
     pub run_as: Option<String>,
     pub with_sudo: Option<bool>,
     pub allowed_to_fail: Option<bool>,
+    pub register: Option<String>,
     // pub prelogic -> TODO
     // pub postlogic -> TODO
     pub moduleblock: ModuleBlockExpectedState,
@@ -36,6 +37,7 @@ pub struct ParsingStep {
     pub run_as: Option<String>,
     pub with_sudo: Option<bool>,
     pub allowed_to_fail: Option<bool>,
+    pub register: Option<String>,
     // pub prelogic -> TODO
     // pub postlogic -> TODO
 
@@ -100,6 +102,7 @@ impl ParsingStep {
                         run_as: self.run_as.clone(),
                         with_sudo: self.with_sudo.clone(),
                         allowed_to_fail: self.allowed_to_fail.clone(),
+                        register: self.register.clone(),
                         // prelogic -> TODO
                         // postlogic -> TODO
                         moduleblock: module_block_expected_state,

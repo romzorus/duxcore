@@ -2,6 +2,7 @@ use crate::workflow::stepflow::{StepFlow, StepStatus};
 use crate::error::Error;
 use crate::task::taskblock::TaskBlock;
 use crate::connection::hosthandler::HostHandler;
+use crate::workflow::hostworkflow::Context;
 
 #[derive(Debug, Clone)]
 pub struct TaskFlow {
@@ -58,11 +59,11 @@ impl TaskFlow {
         Ok(())
     }
 
-    pub fn apply(&mut self, hosthandler: &mut HostHandler) -> Result<(), Error> {
+    pub fn apply(&mut self, hosthandler: &mut HostHandler, context: &mut Context) -> Result<(), Error> {
         let mut task_status = TaskStatus::ApplySuccesful;
         
         for step_flow in self.step_flows.iter_mut() {
-            match step_flow.apply(hosthandler) {
+            match step_flow.apply(hosthandler, context) {
                 Ok(()) => {
                     match &step_flow.step_status {
                         StepStatus::ApplyFailed => {

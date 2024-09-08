@@ -62,7 +62,7 @@ impl HostWorkFlow {
     pub fn apply(&mut self, hosthandler: &mut HostHandler) -> Result<(), Error> {
 
         for task_flow in self.task_flows.iter_mut() {
-            match task_flow.apply(hosthandler) {
+            match task_flow.apply(hosthandler, &mut self.context) {
                 Ok(()) => {}
                 Err(error) => {
                     return Err(error);
