@@ -5,7 +5,8 @@ use crate::result::stepresult::StepResult;
 use crate::connection::hosthandler::HostHandler;
 use crate::connection::specification::Privilege;
 use crate::result::apicallresult::ApiCallStatus;
-use crate::workflow::hostworkflow::Context;
+use crate::workflow::hostworkflow::DuxContext;
+
 
 #[derive(Debug, Clone)]
 pub struct StepFlow {
@@ -30,7 +31,7 @@ impl StepFlow {
         }
     }
 
-    pub fn dry_run(&mut self, hosthandler: &mut HostHandler) -> Result<(), Error> {
+    pub fn dry_run(&mut self, hosthandler: &mut HostHandler, dux_context: &mut DuxContext) -> Result<(), Error> {
         let privilege = match self.step_expected.with_sudo {
             None => match &self.step_expected.run_as {
                 None => Privilege::Usual,
@@ -51,6 +52,7 @@ impl StepFlow {
         match self
             .step_expected
             .moduleblock
+            .consider_context(dux_context).unwrap()
             .dry_run_moduleblock(hosthandler, privilege)
         {
             Ok(mbchange) => {
@@ -71,7 +73,7 @@ impl StepFlow {
 
         Ok(())
     }
-    pub fn apply(&mut self, hosthandler: &mut HostHandler, context: &mut Context) -> Result<(), Error> {
+    pub fn apply(&mut self, hosthandler: &mut HostHandler, dux_context: &mut DuxContext) -> Result<(), Error> {
         // Check that dry_run performed first
         match self.step_status {
             StepStatus::NotRunYet => {
@@ -109,8 +111,9 @@ impl StepFlow {
                             }
                         }
 
+                        // Register : push step result to context under the specified variable name
                         if let Some(variable_name) = &self.step_expected.register {
-                            context.vars.insert(variable_name.into(), result.apicallresults[0].output.clone().unwrap());
+                            dux_context.tera_context.insert(variable_name, &result);
                         }
 
                         self.step_status = step_status;

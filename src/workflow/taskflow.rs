@@ -2,7 +2,7 @@ use crate::workflow::stepflow::{StepFlow, StepStatus};
 use crate::error::Error;
 use crate::task::taskblock::TaskBlock;
 use crate::connection::hosthandler::HostHandler;
-use crate::workflow::hostworkflow::Context;
+use crate::workflow::hostworkflow::DuxContext;
 
 #[derive(Debug, Clone)]
 pub struct TaskFlow {
@@ -34,11 +34,11 @@ impl TaskFlow {
         task_flow
     }
 
-    pub fn dry_run(&mut self, hosthandler: &mut HostHandler) -> Result<(), Error> {
+    pub fn dry_run(&mut self, hosthandler: &mut HostHandler, dux_context: &mut DuxContext) -> Result<(), Error> {
         let mut changes_required = false;
 
         for step_flow in self.step_flows.iter_mut() {
-            match step_flow.dry_run(hosthandler) {
+            match step_flow.dry_run(hosthandler, dux_context) {
                 Ok(()) => {
                     if let StepStatus::ChangeRequired = step_flow.step_status {
                         changes_required = true;
@@ -59,11 +59,11 @@ impl TaskFlow {
         Ok(())
     }
 
-    pub fn apply(&mut self, hosthandler: &mut HostHandler, context: &mut Context) -> Result<(), Error> {
+    pub fn apply(&mut self, hosthandler: &mut HostHandler, dux_context: &mut DuxContext) -> Result<(), Error> {
         let mut task_status = TaskStatus::ApplySuccesful;
         
         for step_flow in self.step_flows.iter_mut() {
-            match step_flow.apply(hosthandler, context) {
+            match step_flow.apply(hosthandler, dux_context) {
                 Ok(()) => {
                     match &step_flow.step_status {
                         StepStatus::ApplyFailed => {

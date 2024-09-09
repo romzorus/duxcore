@@ -24,19 +24,18 @@ impl TaskList {
     }
     pub fn from_str(
         raw_content: &str,
-        content_type: TaskListFileType,
-        host: &Host,
+        content_type: TaskListFileType
     ) -> Result<TaskList, Error> {
         match content_type {
-            TaskListFileType::Yaml => yaml_tasklist_parser(raw_content, host),
-            TaskListFileType::Json => json_tasklist_parser(raw_content, host),
+            TaskListFileType::Yaml => yaml_tasklist_parser(raw_content),
+            TaskListFileType::Json => json_tasklist_parser(raw_content),
             TaskListFileType::Unknown => {
                 // Unknown format -> Try YAML -> Try JSON -> Failed
-                match yaml_tasklist_parser(raw_content, host) {
+                match yaml_tasklist_parser(raw_content) {
                     Ok(task_list) => {
                         return Ok(task_list);
                     }
-                    Err(yaml_try_error) => match json_tasklist_parser(raw_content, host) {
+                    Err(yaml_try_error) => match json_tasklist_parser(raw_content) {
                         Ok(task_list) => {
                             return Ok(task_list);
                         }
@@ -53,12 +52,11 @@ impl TaskList {
     }
     pub fn from_file(
         file_path: &str,
-        file_type: TaskListFileType,
-        host: &Host,
+        file_type: TaskListFileType
     ) -> Result<TaskList, Error> {
         match std::fs::read_to_string(file_path) {
             Ok(file_content) => {
-                return TaskList::from_str(&file_content, file_type, host);
+                return TaskList::from_str(&file_content, file_type);
             }
             Err(error) => {
                 return Err(Error::FailedInitialization(format!(

@@ -6,6 +6,7 @@ use crate::connection::specification::Privilege;
 use crate::error::Error;
 use crate::modules::prelude::*;
 use crate::result::apicallresult::ApiCallResult;
+use crate::workflow::hostworkflow::DuxContext;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -24,6 +25,21 @@ pub enum ModuleBlockExpectedState {
 impl ModuleBlockExpectedState {
     pub fn new() -> ModuleBlockExpectedState {
         ModuleBlockExpectedState::None
+    }
+
+    pub fn consider_context(&mut self, dux_context: &mut DuxContext) -> Result<ModuleBlockExpectedState, Error> {
+
+        // TODO : is this the best way to do this ?
+        let serialized_self = serde_json::to_string(self).unwrap();
+        let context_wise_serialized_self = dux_context.tera_interface.render_str(&serialized_self, &dux_context.tera_context).unwrap();
+        match serde_json::from_str::<ModuleBlockExpectedState>(&context_wise_serialized_self) {
+            Ok(context_wise_moduleblock) => Ok(context_wise_moduleblock),
+            Err(error) => {
+                Err(Error::FailureToParseContent(
+                    format!("{}", error)
+                ))
+            }
+        }
     }
 
     pub fn dry_run_moduleblock(
