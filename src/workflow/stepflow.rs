@@ -52,7 +52,7 @@ impl StepFlow {
         match self
             .step_expected
             .moduleblock
-            // .consider_context(dux_context).unwrap() // If register of a step is used in another step later, dry_run is impossible
+            .consider_context(dux_context).unwrap() // TODO : If register of a step is used in another step later, dry_run is impossible -> handle this case
             .dry_run_moduleblock(hosthandler, privilege)
         {
             Ok(mbchange) => {
@@ -92,6 +92,7 @@ impl StepFlow {
             }
         };
 
+        // Dry run -> Changes
         match self
             .step_expected
             .moduleblock
@@ -114,6 +115,7 @@ impl StepFlow {
             }
         }
 
+        // Apply the changes
         match &self.step_change {
             Some(change) => {
                 let result = change.apply_moduleblockchange(hosthandler);
@@ -135,7 +137,7 @@ impl StepFlow {
 
                 // Register : push step result to context under the specified variable name
                 if let Some(variable_name) = &self.step_expected.register {
-                    dux_context.tera_context.insert(variable_name, &result);
+                    dux_context.tera_context.insert(variable_name, &result.apicallresults);
                 }
 
                 self.step_status = step_status;
