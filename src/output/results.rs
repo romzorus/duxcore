@@ -1,5 +1,6 @@
 use crate::assignment::assignment::Assignment;
 use crate::assignment::assignment::AssignmentFinalStatus;
+use crate::prelude::HostWorkFlow;
 use crate::result::apicallresult::ApiCallStatus;
 use crate::task::step::Step;
 use colored::Colorize;

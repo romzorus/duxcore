@@ -4,7 +4,7 @@ use crate::connection::hosthandler::HostHandler;
 use std::collections::HashMap;
 use crate::host::hosts::Host;
 use crate::error::Error;
-use tera::{Context, Tera};
+use tera::Context;
 
 #[derive(Debug, Clone)]
 pub struct HostWorkFlow {
