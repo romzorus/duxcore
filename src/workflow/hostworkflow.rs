@@ -88,7 +88,6 @@ pub enum HostWorkFlowStatus {
 #[derive(Clone, Debug)]
 pub struct DuxContext {
     pub vars: HashMap<String, String>,
-    pub tera_interface: Tera,
     pub tera_context: Context
 }
 
@@ -96,7 +95,6 @@ impl DuxContext {
     pub fn new() -> DuxContext {
         DuxContext {
             vars: HashMap::new(),
-            tera_interface: Tera::default(),
             tera_context: Context::new()
         }
     }
@@ -105,7 +103,6 @@ impl DuxContext {
         match host.vars {
             Some(vars) => DuxContext {
                 vars: vars.clone(),
-                tera_interface: Tera::default(),
                 tera_context: Context::from_serialize(vars).unwrap()
             },
             None => DuxContext::new(),

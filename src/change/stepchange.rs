@@ -47,7 +47,7 @@ impl StepChange {
     }
 
     pub fn apply_moduleblockchange(&self, hosthandler: &mut HostHandler) -> StepResult {
-        match self {
+        let raw_step_result = match self {
             StepChange::AlreadyMatched(_message) => return StepResult::none(),
             StepChange::ModuleApiCalls(changeslist) => {
                 let mut results: Vec<ApiCallResult> = Vec::new();
@@ -71,8 +71,26 @@ impl StepChange {
                     };
                     results.push(apicallresult);
                 }
-                return StepResult::from(results);
+                StepResult::from(results)
             }
+        };
+
+        let mut step_result = StepResult::new();
+        
+        for result in raw_step_result.apicallresults.iter() {
+            step_result.apicallresults.push(
+                ApiCallResult {
+                    exitcode: result.exitcode,
+                    output: match &result.output { Some(content) => {
+                        Some(content.chars()
+                            .map(|x| if x.is_control() { ' ' } else { x }
+                            ).collect())
+                     } None => None},
+                    status: result.status.clone()
+                }
+            )
         }
+
+        return step_result;
     }
 }
