@@ -69,6 +69,7 @@ impl ModuleBlockExpectedState {
 pub enum ModuleApiCall {
     None(String),
     // **BEACON_4**
+    Debug(DebugApiCall),
     Service(ServiceApiCall),
     LineInFile(LineInFileApiCall),
     Command(CommandApiCall),
