@@ -36,11 +36,11 @@ impl HostWorkFlow {
         }
     }
 
-    pub fn dry_run(&mut self, hosthandler: &mut HostHandler, dux_context: &mut DuxContext) -> Result<(), Error> {
+    pub fn dry_run(&mut self, hosthandler: &mut HostHandler) -> Result<(), Error> {
         let mut changes_required = false;
 
         for task_flow in self.task_flows.iter_mut() {
-            match task_flow.dry_run(hosthandler, dux_context) {
+            match task_flow.dry_run(hosthandler, &mut self.dux_context) {
                 Ok(()) => {
                     if let TaskStatus::ChangeRequired = task_flow.task_status {
                         changes_required = true;
