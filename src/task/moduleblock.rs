@@ -14,6 +14,7 @@ pub enum ModuleBlockExpectedState {
     None, // Used for new() methods, initializations and errors
     // **BEACON_2**
     Service(ServiceBlockExpectedState),
+    Debug(DebugBlockExpectedState),
     LineInFile(LineInFileBlockExpectedState),
     Command(CommandBlockExpectedState),
     Apt(AptBlockExpectedState),
@@ -51,6 +52,7 @@ impl ModuleBlockExpectedState {
             ModuleBlockExpectedState::None => Ok(StepChange::matched("none")),
             // **BEACON_3**
             ModuleBlockExpectedState::Service(block) => block.dry_run_block(hosthandler, privilege),
+            ModuleBlockExpectedState::Debug(block) => block.dry_run_block(hosthandler, privilege),
             ModuleBlockExpectedState::LineInFile(block) => {
                 block.dry_run_block(hosthandler, privilege)
             }

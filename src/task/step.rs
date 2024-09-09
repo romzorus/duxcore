@@ -45,6 +45,7 @@ pub struct ParsingStep {
     // It requires parsemodule() method to check that only one attribute per step is filled.
     // **BEACON_1**
     pub service: Option<ServiceBlockExpectedState>,
+    pub debug: Option<DebugBlockExpectedState>,
     pub lineinfile: Option<LineInFileBlockExpectedState>,
     pub command: Option<CommandBlockExpectedState>,
     pub apt: Option<AptBlockExpectedState>,
@@ -63,6 +64,10 @@ impl ParsingStep {
         if let Some(content) = self.service.clone() {
             counter += 1;
             moduleblock = Some(ModuleBlockExpectedState::Service(content));
+        }
+        if let Some(content) = self.debug.clone() {
+            counter += 1;
+            moduleblock = Some(ModuleBlockExpectedState::Debug(content));
         }
         if let Some(content) = self.lineinfile.clone() {
             counter += 1;
