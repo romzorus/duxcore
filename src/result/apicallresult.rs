@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ApiCallResult {
-    pub exitcode: Option<i32>,
+    pub rc: Option<i32>,
     pub output: Option<String>,
     pub status: ApiCallStatus,
 }
@@ -10,7 +10,7 @@ pub struct ApiCallResult {
 impl ApiCallResult {
     pub fn new() -> ApiCallResult {
         ApiCallResult {
-            exitcode: None,
+            rc: None,
             output: None,
             status: ApiCallStatus::Unset,
         }
@@ -18,19 +18,19 @@ impl ApiCallResult {
 
     pub fn none() -> ApiCallResult {
         ApiCallResult {
-            exitcode: None,
+            rc: None,
             output: None,
             status: ApiCallStatus::None,
         }
     }
 
     pub fn from(
-        exitcode: Option<i32>,
+        rc: Option<i32>,
         output: Option<String>,
         status: ApiCallStatus,
     ) -> ApiCallResult {
         ApiCallResult {
-            exitcode,
+            rc,
             output,
             status,
         }

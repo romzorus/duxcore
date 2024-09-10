@@ -82,7 +82,7 @@ impl StepChange {
         for result in raw_step_result.apicallresults.iter() {
             step_result.apicallresults.push(
                 ApiCallResult {
-                    exitcode: result.exitcode,
+                    rc: result.rc,
                     output: match &result.output { Some(content) => {
                         Some(content.chars()
                             .map(|x| if x.is_control() { ' ' } else { x }

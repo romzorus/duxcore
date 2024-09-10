@@ -139,9 +139,9 @@ impl Apply for AptApiCall {
                     .run_cmd(cmd.as_str(), self.privilege.clone())
                     .unwrap();
 
-                if cmd_result.exitcode == 0 {
+                if cmd_result.rc == 0 {
                     return ApiCallResult::from(
-                        Some(cmd_result.exitcode),
+                        Some(cmd_result.rc),
                         Some(cmd_result.stdout),
                         ApiCallStatus::ChangeSuccessful(format!(
                             "{} install successful",
@@ -150,7 +150,7 @@ impl Apply for AptApiCall {
                     );
                 } else {
                     return ApiCallResult::from(
-                        Some(cmd_result.exitcode),
+                        Some(cmd_result.rc),
                         Some(cmd_result.stdout),
                         ApiCallStatus::Failure(format!(
                             "{} install failed",
@@ -168,9 +168,9 @@ impl Apply for AptApiCall {
                     .run_cmd(cmd.as_str(), self.privilege.clone())
                     .unwrap();
 
-                if cmd_result.exitcode == 0 {
+                if cmd_result.rc == 0 {
                     return ApiCallResult::from(
-                        Some(cmd_result.exitcode),
+                        Some(cmd_result.rc),
                         Some(cmd_result.stdout),
                         ApiCallStatus::ChangeSuccessful(format!(
                             "{} removal successful",
@@ -179,7 +179,7 @@ impl Apply for AptApiCall {
                     );
                 } else {
                     return ApiCallResult::from(
-                        Some(cmd_result.exitcode),
+                        Some(cmd_result.rc),
                         Some(cmd_result.stdout),
                         ApiCallStatus::Failure(format!(
                             "{} removal failed",
@@ -195,15 +195,15 @@ impl Apply for AptApiCall {
                 let cmd = "DEBIAN_FRONTEND=noninteractive apt-get upgrade -y";
                 let cmd_result = hosthandler.run_cmd(cmd, self.privilege.clone()).unwrap();
 
-                if cmd_result.exitcode == 0 {
+                if cmd_result.rc == 0 {
                     return ApiCallResult::from(
-                        Some(cmd_result.exitcode),
+                        Some(cmd_result.rc),
                         Some(cmd_result.stdout),
                         ApiCallStatus::ChangeSuccessful(String::from("APT upgrade successful")),
                     );
                 } else {
                     return ApiCallResult::from(
-                        Some(cmd_result.exitcode),
+                        Some(cmd_result.rc),
                         Some(cmd_result.stdout),
                         ApiCallStatus::Failure(String::from("APT upgrade failed")),
                     );
@@ -231,9 +231,9 @@ fn is_package_installed(hosthandler: &mut HostHandler, package: String) -> bool 
         .run_cmd(format!("dpkg -s {}", package).as_str(), Privilege::Usual)
         .unwrap();
 
-    if test.exitcode == 0 && test.stdout.contains("Status: install") {
+    if test.rc == 0 && test.stdout.contains("Status: install") {
         true
-    } else if test.exitcode == 0 && test.stdout.contains("Status: deinstall") {
+    } else if test.rc == 0 && test.stdout.contains("Status: deinstall") {
         false
     } else {
         false

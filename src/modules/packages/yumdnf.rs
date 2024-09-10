@@ -149,9 +149,9 @@ impl Apply for YumDnfApiCall {
                     .run_cmd(cmd.as_str(), self.privilege.clone())
                     .unwrap();
 
-                if cmd_result.exitcode == 0 {
+                if cmd_result.rc == 0 {
                     return ApiCallResult::from(
-                        Some(cmd_result.exitcode),
+                        Some(cmd_result.rc),
                         Some(cmd_result.stdout),
                         ApiCallStatus::ChangeSuccessful(format!(
                             "{} install successful",
@@ -160,7 +160,7 @@ impl Apply for YumDnfApiCall {
                     );
                 } else {
                     return ApiCallResult::from(
-                        Some(cmd_result.exitcode),
+                        Some(cmd_result.rc),
                         Some(cmd_result.stdout),
                         ApiCallStatus::Failure(format!(
                             "{} install failed",
@@ -175,9 +175,9 @@ impl Apply for YumDnfApiCall {
                     .run_cmd(cmd.as_str(), self.privilege.clone())
                     .unwrap();
 
-                if cmd_result.exitcode == 0 {
+                if cmd_result.rc == 0 {
                     return ApiCallResult::from(
-                        Some(cmd_result.exitcode),
+                        Some(cmd_result.rc),
                         Some(cmd_result.stdout),
                         ApiCallStatus::ChangeSuccessful(format!(
                             "{} removal successful",
@@ -186,7 +186,7 @@ impl Apply for YumDnfApiCall {
                     );
                 } else {
                     return ApiCallResult::from(
-                        Some(cmd_result.exitcode),
+                        Some(cmd_result.rc),
                         Some(cmd_result.stdout),
                         ApiCallStatus::Failure(format!(
                             "{} removal failed",
@@ -201,16 +201,16 @@ impl Apply for YumDnfApiCall {
                     .run_cmd(cmd.as_str(), self.privilege.clone())
                     .unwrap();
 
-                if cmd_result.exitcode == 0 {
+                if cmd_result.rc == 0 {
                     return ApiCallResult::from(
-                        Some(cmd_result.exitcode),
+                        Some(cmd_result.rc),
                         Some(cmd_result.stdout),
                         ApiCallStatus::ChangeSuccessful(String::from("Yum/DNF upgrade successful")),
                     );
                 } else {
                     println!("------{}", cmd_result.stdout);
                     return ApiCallResult::from(
-                        Some(cmd_result.exitcode),
+                        Some(cmd_result.rc),
                         Some(cmd_result.stdout),
                         ApiCallStatus::Failure(String::from("Yum/DNF upgrade failed")),
                     );
@@ -252,7 +252,7 @@ fn is_package_installed(
         )
         .unwrap();
 
-    if test.exitcode == 0 {
+    if test.rc == 0 {
         return true;
     } else {
         return false;

@@ -178,15 +178,15 @@ impl Apply for ServiceApiCall {
                     )
                     .unwrap();
 
-                if cmd_result.exitcode == 0 {
+                if cmd_result.rc == 0 {
                     ApiCallResult::from(
-                        Some(cmd_result.exitcode),
+                        Some(cmd_result.rc),
                         Some(cmd_result.stdout),
                         ApiCallStatus::ChangeSuccessful(format!("{} started", self.name.clone())),
                     )
                 } else {
                     return ApiCallResult::from(
-                        Some(cmd_result.exitcode),
+                        Some(cmd_result.rc),
                         Some(cmd_result.stdout),
                         ApiCallStatus::Failure(String::from("Failed to start service")),
                     );
@@ -200,15 +200,15 @@ impl Apply for ServiceApiCall {
                     )
                     .unwrap();
 
-                if cmd_result.exitcode == 0 {
+                if cmd_result.rc == 0 {
                     ApiCallResult::from(
-                        Some(cmd_result.exitcode),
+                        Some(cmd_result.rc),
                         Some(cmd_result.stdout),
                         ApiCallStatus::ChangeSuccessful(format!("{} stopped", self.name.clone())),
                     )
                 } else {
                     return ApiCallResult::from(
-                        Some(cmd_result.exitcode),
+                        Some(cmd_result.rc),
                         Some(cmd_result.stdout),
                         ApiCallStatus::Failure(String::from("Failed to stop service")),
                     );
@@ -222,15 +222,15 @@ impl Apply for ServiceApiCall {
                     )
                     .unwrap();
 
-                if cmd_result.exitcode == 0 {
+                if cmd_result.rc == 0 {
                     ApiCallResult::from(
-                        Some(cmd_result.exitcode),
+                        Some(cmd_result.rc),
                         Some(cmd_result.stdout),
                         ApiCallStatus::ChangeSuccessful(format!("{} enabled", self.name.clone())),
                     )
                 } else {
                     return ApiCallResult::from(
-                        Some(cmd_result.exitcode),
+                        Some(cmd_result.rc),
                         Some(cmd_result.stdout),
                         ApiCallStatus::Failure(String::from("Failed to enable service")),
                     );
@@ -244,15 +244,15 @@ impl Apply for ServiceApiCall {
                     )
                     .unwrap();
 
-                if cmd_result.exitcode == 0 {
+                if cmd_result.rc == 0 {
                     ApiCallResult::from(
-                        Some(cmd_result.exitcode),
+                        Some(cmd_result.rc),
                         Some(cmd_result.stdout),
                         ApiCallStatus::ChangeSuccessful(format!("{} disabled", self.name.clone())),
                     )
                 } else {
                     return ApiCallResult::from(
-                        Some(cmd_result.exitcode),
+                        Some(cmd_result.rc),
                         Some(cmd_result.stdout),
                         ApiCallStatus::Failure(String::from("Failed to disable service")),
                     );
@@ -279,7 +279,7 @@ fn service_is_active(hosthandler: &mut HostHandler, name: &String) -> Result<boo
         Privilege::Usual,
     ) {
         Ok(test_result) => {
-            if test_result.exitcode == 0 {
+            if test_result.rc == 0 {
                 Ok(true)
             } else {
                 Ok(false)
@@ -295,7 +295,7 @@ fn service_is_enabled(hosthandler: &mut HostHandler, name: &String) -> Result<bo
         Privilege::Usual,
     ) {
         Ok(test_result) => {
-            if test_result.exitcode == 0 {
+            if test_result.rc == 0 {
                 Ok(true)
             } else {
                 Ok(false)

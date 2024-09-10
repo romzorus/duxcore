@@ -138,7 +138,7 @@ impl Ssh2HostHandler {
 
         match check_cmd_result {
             Ok(cmd_result) => {
-                if cmd_result.exitcode == 0 {
+                if cmd_result.rc == 0 {
                     return Ok(true);
                 } else {
                     return Ok(false);
@@ -165,7 +165,7 @@ impl Ssh2HostHandler {
                 channel.wait_close().unwrap();
 
                 return Ok(CmdResult {
-                    exitcode: channel.exit_status().unwrap(),
+                    rc: channel.exit_status().unwrap(),
                     stdout: s,
                 });
             }

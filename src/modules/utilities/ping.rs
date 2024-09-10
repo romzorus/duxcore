@@ -20,7 +20,7 @@ impl DryRun for PingBlockExpectedState {
         let cmd = String::from("DEBIAN_FRONTEND=noninteractive id");
         let cmd_result = hosthandler.run_cmd(cmd.as_str(), privilege)?;
 
-        if cmd_result.exitcode == 0 {
+        if cmd_result.rc == 0 {
             return Ok(StepChange::AlreadyMatched("Host reachable".to_string()));
         } else {
             return Err(Error::FailedDryRunEvaluation(

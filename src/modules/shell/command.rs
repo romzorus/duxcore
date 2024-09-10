@@ -53,15 +53,15 @@ impl Apply for CommandApiCall {
             .run_cmd(self.cmd.as_str(), self.privilege.clone())
             .unwrap();
 
-        if cmd_result.exitcode == 0 {
+        if cmd_result.rc == 0 {
             return ApiCallResult::from(
-                Some(cmd_result.exitcode),
+                Some(cmd_result.rc),
                 Some(cmd_result.stdout),
                 ApiCallStatus::ChangeSuccessful(String::from("Command successful")),
             );
         } else {
             return ApiCallResult::from(
-                Some(cmd_result.exitcode),
+                Some(cmd_result.rc),
                 Some(cmd_result.stdout),
                 ApiCallStatus::Failure(String::from("Command failed")),
             );

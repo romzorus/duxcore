@@ -42,7 +42,7 @@ impl DryRun for LineInFileBlockExpectedState {
             )
             .unwrap();
 
-        if file_exists_check.exitcode != 0 {
+        if file_exists_check.rc != 0 {
             return Err(Error::FailedDryRunEvaluation(format!(
                 "{} not found or not a regular file",
                 self.filepath
@@ -250,7 +250,7 @@ impl Apply for LineInFileApiCall {
                         let filesizecheck = hosthandler
                             .run_cmd(filesizecheck_cmd.as_str(), self.privilege.clone())
                             .unwrap();
-                        if filesizecheck.exitcode == 0 {
+                        if filesizecheck.rc == 0 {
                             // File not empty
                             format!("sed -i \'{} i {}\' {}", linenumber, self.line, self.path)
                         } else {
@@ -261,7 +261,7 @@ impl Apply for LineInFileApiCall {
                             } else {
                                 // Position = <any other value> which is out of range anyway
                                 return ApiCallResult::from(
-                                    Some(filesizecheck.exitcode),
+                                    Some(filesizecheck.rc),
                                     Some(filesizecheck.stdout),
                                     ApiCallStatus::Failure(String::from(
                                         "Position value out of range (use \"bottom\" instead)",
@@ -280,15 +280,15 @@ impl Apply for LineInFileApiCall {
                     .run_cmd(cmd.as_str(), self.privilege.clone())
                     .unwrap();
 
-                if cmd_result.exitcode == 0 {
+                if cmd_result.rc == 0 {
                     return ApiCallResult::from(
-                        Some(cmd_result.exitcode),
+                        Some(cmd_result.rc),
                         Some(cmd_result.stdout),
                         ApiCallStatus::ChangeSuccessful(String::from("Line added")),
                     );
                 } else {
                     return ApiCallResult::from(
-                        Some(cmd_result.exitcode),
+                        Some(cmd_result.rc),
                         Some(cmd_result.stdout),
                         ApiCallStatus::Failure(String::from("Failed to add line")),
                     );
@@ -313,9 +313,9 @@ impl Apply for LineInFileApiCall {
                     .run_cmd(cmd.as_str(), self.privilege.clone())
                     .unwrap();
 
-                if cmd_result.exitcode == 0 {
+                if cmd_result.rc == 0 {
                     return ApiCallResult::from(
-                        Some(cmd_result.exitcode),
+                        Some(cmd_result.rc),
                         Some(cmd_result.stdout),
                         ApiCallStatus::ChangeSuccessful(format!(
                             "Line {:?} removed",
@@ -324,7 +324,7 @@ impl Apply for LineInFileApiCall {
                     );
                 } else {
                     return ApiCallResult::from(
-                        Some(cmd_result.exitcode),
+                        Some(cmd_result.rc),
                         Some(cmd_result.stdout),
                         ApiCallStatus::Failure(String::from("Failed to remove line")),
                     );
@@ -351,7 +351,7 @@ fn is_line_present(
         )
         .unwrap();
 
-    if test.exitcode == 0 {
+    if test.rc == 0 {
         let mut line_numbers: Vec<u32> = Vec::new();
         for line in test.stdout.lines() {
             line_numbers.push(line.split(':').next().unwrap().parse::<u32>().unwrap());
