@@ -176,11 +176,33 @@ impl Ssh2HostHandler {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub enum Ssh2AuthMode {
     Unset,
     UsernamePassword(Credentials),
     KeyFile((String, PathBuf)), // (username, private key's path)
     KeyMemory((String, Pem)),   // (username, PEM encoded key from memory)
     Agent(String),              // Name of SSH agent
+}
+
+impl std::fmt::Debug for Ssh2AuthMode {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            Ssh2AuthMode::Unset => {
+                write!(f, "Unset")
+            }
+            Ssh2AuthMode::UsernamePassword(creds) => {
+                write!(f, "UsernamePassword(Credentials {{ username: {:?}, password: \"HIDDEN PASSWORD\" }})", creds.username)
+            }
+            Ssh2AuthMode::KeyFile((username, key_path)) => {
+                write!(f, "KeyFile(({:?}, {:?}))", username, key_path)
+            }
+            Ssh2AuthMode::KeyMemory((username, _key_content)) => {
+                write!(f, "KeyMemory(({:?}, \"HIDDEN KEY CONTENT\"))", username)
+            }
+            Ssh2AuthMode::Agent(agent_name) => {
+                write!(f, "Agent({:?})", agent_name)
+            }
+        }
+    }
 }
