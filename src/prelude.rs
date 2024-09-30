@@ -1,3 +1,5 @@
+//! Rapidly get started by importing all main items
+
 pub use crate::assignment::assignment::Assignment;
 pub use crate::assignment::assignment::AssignmentFinalStatus;
 pub use crate::assignment::correlationid::CorrelationIdGenerator;

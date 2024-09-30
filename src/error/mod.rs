@@ -1,3 +1,5 @@
+//! Dux specific errors
+
 // Definition of all possible errors for the whole crate
 // FIXME : relevant to subdivide this into multiple enums ?
 

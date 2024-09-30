@@ -85,6 +85,7 @@ pub enum HostWorkFlowStatus {
     ApplyFailed,
 }
 
+/// Withholds variables, either defined in advance by the user in HostList and/or Tasklist or defined at runtime (output of a Step saved as a variable). This struct is accessible by each step during the tasklist traversal.
 #[derive(Clone, Debug)]
 pub struct DuxContext {
     pub vars: HashMap<String, String>,

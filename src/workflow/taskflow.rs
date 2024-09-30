@@ -4,6 +4,10 @@ use crate::task::taskblock::TaskBlock;
 use crate::connection::hosthandler::HostHandler;
 use crate::workflow::hostworkflow::DuxContext;
 
+/// A TaskFlow withholds all step flows, a flow being being the combination of :
+/// - an expected state
+/// - changes required to have the host match this expected state
+/// - results of actually trying to enforce these changes
 #[derive(Debug, Clone)]
 pub struct TaskFlow {
     pub name: Option<String>,

@@ -1,3 +1,5 @@
+//! Most frequent case : reach host through SSHv2
+
 use crate::connection::specification::Credentials;
 use crate::error::Error;
 use crate::result::cmd::CmdResult;
