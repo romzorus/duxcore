@@ -91,7 +91,7 @@
 //! ```
 
 pub mod assignment;
-pub mod change;
+pub mod step;
 pub mod connection;
 pub mod error;
 pub mod exitcode;

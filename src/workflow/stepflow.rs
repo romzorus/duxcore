@@ -1,7 +1,7 @@
 use crate::error::Error;
 use crate::task::step::Step;
-use crate::change::stepchange::StepChange;
-use crate::result::stepresult::StepResult;
+use crate::step::stepchange::StepChange;
+use crate::step::stepresult::StepResult;
 use crate::connection::hosthandler::HostHandler;
 use crate::connection::specification::Privilege;
 use crate::result::apicallresult::ApiCallStatus;
