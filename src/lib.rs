@@ -90,14 +90,14 @@
 //! }
 //! ```
 
-pub mod assignment;
+pub mod job;
 pub mod step;
 pub mod connection;
 pub mod error;
 pub mod exitcode;
 pub mod host;
 pub mod modules;
-pub mod output;
+// pub mod output;
 pub mod prelude;
 pub mod result;
 pub mod task;

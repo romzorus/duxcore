@@ -1,9 +1,8 @@
 //! Rapidly get started by importing all main items
 
-pub use crate::assignment::assignment::Assignment;
-pub use crate::assignment::assignment::AssignmentFinalStatus;
-pub use crate::assignment::correlationid::CorrelationIdGenerator;
-pub use crate::change::changelist::ChangeList;
+pub use crate::job::job::Assignment;
+pub use crate::job::job::AssignmentFinalStatus;
+pub use crate::job::correlationid::CorrelationIdGenerator;
 pub use crate::connection::connectionmode::localhost::LocalHostConnectionDetails;
 pub use crate::connection::connectionmode::ssh2mode::{Ssh2AuthMode, Ssh2ConnectionDetails};
 pub use crate::connection::hosthandler::ConnectionDetails;
@@ -18,8 +17,6 @@ pub use crate::host::hostlist::hostlist_get_from_file;
 pub use crate::host::hostlist::HostList;
 pub use crate::host::hosts::Host;
 pub use crate::host::parser::hostlist_parser;
-pub use crate::output::results::display_output;
-pub use crate::result::resultlist::ResultList;
 pub use crate::task::tasklist::RunningMode;
 pub use crate::task::tasklist::TaskList;
 pub use crate::task::tasklist::TaskListFileType;

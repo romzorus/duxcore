@@ -1,6 +1,6 @@
 use crate::connection::hosthandler::HostHandler;
 use crate::result::apicallresult::ApiCallResult;
-use crate::result::stepresult::StepResult;
+use crate::step::stepresult::StepResult;
 use crate::task::moduleblock::Apply;
 use crate::task::moduleblock::ModuleApiCall;
 use serde::{Deserialize, Serialize};

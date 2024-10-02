@@ -1,6 +1,6 @@
 // Command module : <short description>
 
-use crate::change::stepchange::StepChange;
+use crate::step::stepchange::StepChange;
 use crate::connection::hosthandler::HostHandler;
 use crate::connection::specification::Privilege;
 use crate::error::Error;

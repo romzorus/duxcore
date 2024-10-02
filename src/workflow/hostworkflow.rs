@@ -4,6 +4,7 @@ use crate::connection::hosthandler::HostHandler;
 use std::collections::HashMap;
 use crate::host::hosts::Host;
 use crate::error::Error;
+use serde::{Deserialize, Serialize};
 use tera::Context;
 
 #[derive(Debug, Clone)]
@@ -75,7 +76,7 @@ impl HostWorkFlow {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum HostWorkFlowStatus {
     NotRunYet,
     AlreadyMatched,
@@ -100,11 +101,11 @@ impl DuxContext {
         }
     }
 
-    pub fn from(host: Host) -> DuxContext {
-        match host.vars {
-            Some(vars) => DuxContext {
-                vars: vars.clone(),
-                tera_context: Context::from_serialize(vars).unwrap()
+    pub fn from(vars: Option<HashMap<String, String>>) -> DuxContext {
+        match vars {
+            Some(variables) => DuxContext {
+                vars: variables.clone(),
+                tera_context: Context::from_serialize(variables).unwrap()
             },
             None => DuxContext::new(),
         }

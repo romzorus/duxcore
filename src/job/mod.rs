@@ -1,2 +1,2 @@
-pub mod assignment;
+pub mod job;
 pub mod correlationid;

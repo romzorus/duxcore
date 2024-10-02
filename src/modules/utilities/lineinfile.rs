@@ -1,6 +1,6 @@
 // LineInFile module : manipulate lines in a file (add, delete)
 
-use crate::change::stepchange::StepChange;
+use crate::step::stepchange::StepChange;
 use crate::connection::hosthandler::HostHandler;
 use crate::connection::specification::Privilege;
 use crate::error::Error;
