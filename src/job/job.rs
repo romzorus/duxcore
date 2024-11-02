@@ -19,7 +19,7 @@ pub struct Job {
     host_connection_info: HostConnectionInfo,
     correlation_id: Option<String>,
     tasklist: Option<TaskList>,
-    context: Option<DuxContext>,
+    context: DuxContext,
     timestamp_start: Option<String>,
     timestamp_end: Option<String>,
     hostworkflow: Option<HostWorkFlow>,
@@ -33,7 +33,7 @@ impl Job {
             host_connection_info: HostConnectionInfo::Unset,
             correlation_id: None,
             tasklist: None,
-            context: None,
+            context: DuxContext::new(),
             timestamp_start: None,
             timestamp_end: None,
             hostworkflow: None,
@@ -131,7 +131,7 @@ impl Job {
     }
 
     pub fn set_context(&mut self, context: DuxContext) {
-        self.context = Some(context);
+        self.context = context;
     }
 
     /// "DRY_RUN" this job -> evaluate the difference between the expected state and the actual state of the given host
@@ -156,7 +156,7 @@ impl Job {
                 host_work_flow.dry_run(&mut host_handler)?;
             }
             None => {
-                let mut host_work_flow = HostWorkFlow::from(&self.tasklist.as_mut().unwrap(), self.context.as_ref().unwrap().clone());
+                let mut host_work_flow = HostWorkFlow::from(&self.tasklist.as_mut().unwrap(), self.context.clone());
                 host_work_flow.dry_run(&mut host_handler)?;
             }
         }
@@ -186,7 +186,7 @@ impl Job {
                 host_work_flow.apply(&mut host_handler)?;
             }
             None => {
-                let mut host_work_flow = HostWorkFlow::from(&self.tasklist.as_mut().unwrap(), self.context.as_ref().unwrap().clone());
+                let mut host_work_flow = HostWorkFlow::from(&self.tasklist.as_mut().unwrap(), self.context.clone());
                 host_work_flow.apply(&mut host_handler)?;
             }
         }
