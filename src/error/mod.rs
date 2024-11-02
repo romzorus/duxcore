@@ -17,6 +17,6 @@ pub enum Error {
     GroupNotFound,
     MissingGroupsList,
     WorkFlowNotFollowed(String),
-    WrongInitialization,
+    WrongInitialization(String),
     AnyOtherError(String),
 }

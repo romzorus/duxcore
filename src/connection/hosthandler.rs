@@ -5,6 +5,8 @@ use crate::error::Error;
 use crate::result::cmd::CmdResult;
 use serde::{Deserialize, Serialize};
 
+use super::host_connection::HostConnectionInfo;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HostHandlingInfo {
     pub connectionmode: ConnectionMode,
@@ -49,41 +51,28 @@ impl HostHandler {
             ssh2: None
         }
     }
-    pub fn from(hosthandlinginfo: &HostHandlingInfo) -> Result<HostHandler, Error> {
-        match hosthandlinginfo.connectionmode {
-            ConnectionMode::Unset => Err(Error::MissingInitialization(
-                "ConnectionMode is unset".to_string(),
-            )),
-            ConnectionMode::LocalHost => {
-                if let ConnectionDetails::LocalHost(localhostconnectiondetails) =
-                    &hosthandlinginfo.connectiondetails
-                {
-                    Ok(HostHandler {
-                        connectionmode: hosthandlinginfo.connectionmode.clone(),
-                        localhost: Some(LocalHostHandler::from(
-                            localhostconnectiondetails.user.clone(),
-                        )),
-                        ssh2: None,
-                    })
-                } else {
-                    Err(Error::WrongInitialization)
-                }
+
+    pub fn from(address: String, host_connection_info: HostConnectionInfo) -> Result<HostHandler, Error> {
+
+        match host_connection_info {
+            HostConnectionInfo::Unset => {
+                Err(Error::MissingInitialization(
+                    "Host connection info is still unset. Unable to build a HostHandler.".into()
+                ))
             }
-            ConnectionMode::Ssh2 => {
-                if let ConnectionDetails::Ssh2(ss2connectiondetails) =
-                    &hosthandlinginfo.connectiondetails
-                {
-                    Ok(HostHandler {
-                        connectionmode: hosthandlinginfo.connectionmode.clone(),
-                        localhost: None,
-                        ssh2: Some(Ssh2HostHandler::from(
-                            ss2connectiondetails.hostaddress.clone(),
-                            ss2connectiondetails.authmode.clone(),
-                        )),
-                    })
-                } else {
-                    Err(Error::WrongInitialization)
-                }
+            HostConnectionInfo::LocalHost(which_user) => {
+                Ok(HostHandler {
+                    connectionmode: ConnectionMode::LocalHost,
+                    localhost: Some(LocalHostHandler::from(which_user)),
+                    ssh2: None
+                })
+            }
+            HostConnectionInfo::Ssh2(ssh2_auth_mode) => {
+                Ok(HostHandler {
+                    connectionmode: ConnectionMode::Ssh2,
+                    localhost: None,
+                    ssh2: Some(Ssh2HostHandler::from(address, ssh2_auth_mode))
+                })
             }
         }
     }

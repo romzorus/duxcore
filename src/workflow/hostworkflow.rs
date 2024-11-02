@@ -23,7 +23,7 @@ impl HostWorkFlow {
         }
     }
 
-    pub fn from(task_list: TaskList, dux_context: DuxContext) -> HostWorkFlow {
+    pub fn from(task_list: &TaskList, dux_context: DuxContext) -> HostWorkFlow {
         let mut task_flows: Vec<TaskFlow> = Vec::new();
 
         for task_block in task_list.tasks.iter() {
@@ -101,13 +101,17 @@ impl DuxContext {
         }
     }
 
-    pub fn from(vars: Option<HashMap<String, String>>) -> DuxContext {
-        match vars {
-            Some(variables) => DuxContext {
-                vars: variables.clone(),
-                tera_context: Context::from_serialize(variables).unwrap()
+    pub fn from(host: Host) -> DuxContext {
+        match host.vars {
+            Some(vars) => DuxContext {
+                vars: vars.clone(),
+                tera_context: Context::from_serialize(vars).unwrap()
             },
             None => DuxContext::new(),
         }
+    }
+
+    pub fn set_var(&mut self, key: &str, value: &str) {
+        self.vars.insert(key.to_string(), value.to_string());
     }
 }

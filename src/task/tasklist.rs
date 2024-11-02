@@ -64,19 +64,19 @@ impl TaskList {
             }
         }
     }
-    pub fn dry_run_tasklist(&self, hosthandler: &mut HostHandler) -> Result<ChangeList, Error> {
-        let mut list: Vec<TaskChange> = Vec::new();
+    // pub fn dry_run_tasklist(&self, hosthandler: &mut HostHandler) -> Result<ChangeList, Error> {
+    //     let mut list: Vec<TaskChange> = Vec::new();
 
-        for taskcontent in self.tasks.clone().iter() {
-            match taskcontent.dry_run_task(hosthandler) {
-                Ok(taskchange) => {
-                    list.push(taskchange);
-                }
-                Err(e) => return Err(e),
-            }
-        }
-        return Ok(ChangeList::from(Some(list), hosthandler.clone()));
-    }
+    //     for taskcontent in self.tasks.clone().iter() {
+    //         match taskcontent.dry_run_task(hosthandler) {
+    //             Ok(taskchange) => {
+    //                 list.push(taskchange);
+    //             }
+    //             Err(e) => return Err(e),
+    //         }
+    //     }
+    //     return Ok(ChangeList::from(Some(list), hosthandler.clone()));
+    // }
 }
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
