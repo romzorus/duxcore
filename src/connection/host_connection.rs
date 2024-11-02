@@ -4,7 +4,7 @@ use crate::connection::connectionmode::localhost::WhichUser;
 use crate::connection::connectionmode::ssh2mode::Ssh2AuthMode;
 use crate::connection::specification::Credentials;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub enum HostConnectionInfo {
     Unset,
     LocalHost(WhichUser),
@@ -46,9 +46,9 @@ impl HostConnectionInfo {
     }
 
     /// Commands will be run on a remote host through SSH2, using a key
-    pub fn ssh2_with_key_file(username: String, key_file_path: PathBuf) -> HostConnectionInfo {
+    pub fn ssh2_with_key_file(username: &str, key_file_path: &str) -> HostConnectionInfo {
         HostConnectionInfo::Ssh2(
-            Ssh2AuthMode::KeyFile((username, key_file_path))
+            Ssh2AuthMode::KeyFile((username.to_string(), PathBuf::from(key_file_path)))
         )
     }
 

@@ -13,6 +13,7 @@ use sha2::{Digest, Sha256};
 use machineid_rs::{Encryption, HWIDComponent, IdBuilder};
 use std::time::SystemTime;
 
+#[derive(Debug, Clone)]
 pub struct Job {
     address: HostAddress,
     host_connection_info: HostConnectionInfo,
@@ -41,7 +42,7 @@ impl Job {
     }
 
     /// Set host address
-    pub fn set_address(&mut self, address: String) -> Result<&mut Self, Error> {
+    pub fn set_address(&mut self, address: &str) -> Result<&mut Self, Error> {
         // TODO : Add controls on address content (invalid address with spaces or else...)
         match address.to_lowercase().as_str() {
             "localhost" => {
@@ -58,7 +59,7 @@ impl Job {
                 ));
             }
             _ => {
-                self.address = HostAddress::RemoteHost(address);
+                self.address = HostAddress::RemoteHost(address.to_string());
                 Ok(self)
             }
         }
@@ -213,6 +214,7 @@ pub enum JobFinalStatus {
     GenericFailed(String),
 }
 
+#[derive(Debug, Clone)]
 pub enum HostAddress {
     Unset,
     LocalHost,

@@ -18,3 +18,5 @@ pub use crate::task::tasklist::RunningMode;
 pub use crate::task::tasklist::TaskList;
 pub use crate::task::tasklist::TaskListFileType;
 pub use crate::workflow::hostworkflow::{HostWorkFlow, DuxContext};
+pub use crate::job::job::*;
+pub use crate::connection::host_connection::HostConnectionInfo;
