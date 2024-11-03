@@ -181,6 +181,8 @@ impl Job {
             }
         };
 
+        host_handler.init();
+
         match &mut self.hostworkflow {
             Some(host_work_flow) => {
                 host_work_flow.apply(&mut host_handler)?;
