@@ -158,6 +158,7 @@ impl Job {
             None => {
                 let mut host_work_flow = HostWorkFlow::from(&self.tasklist.as_mut().unwrap(), self.context.clone());
                 host_work_flow.dry_run(&mut host_handler)?;
+                self.hostworkflow = Some(host_work_flow);
             }
         }
 
@@ -190,6 +191,7 @@ impl Job {
             None => {
                 let mut host_work_flow = HostWorkFlow::from(&self.tasklist.as_mut().unwrap(), self.context.clone());
                 host_work_flow.apply(&mut host_handler)?;
+                self.hostworkflow = Some(host_work_flow);
             }
         }
 
