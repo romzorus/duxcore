@@ -63,15 +63,48 @@ impl HostWorkFlow {
     }
     pub fn apply(&mut self, hosthandler: &mut HostHandler) -> Result<(), Error> {
 
-        for task_flow in self.task_flows.iter_mut() {
-            match task_flow.apply(hosthandler, &mut self.dux_context) {
-                Ok(()) => {}
-                Err(error) => {
-                    return Err(error);
+        if let HostWorkFlowStatus::AlreadyMatched = self.final_status {
+            // Nothing to do, dry_run was performed before and concluded that nothing is to be
+        } else {
+            let mut already_matched = true;
+            let mut allowed_failures = false;
+            let mut failures = false;
+
+            for task_flow in self.task_flows.iter_mut() {
+                match task_flow.apply(hosthandler, &mut self.dux_context) {
+                    Ok(()) => {
+                        match task_flow.task_status {
+                            TaskStatus::ApplySuccesful => {
+                                already_matched = false;
+                                }
+                            TaskStatus::AlreadyMatched => {}
+                            TaskStatus::ApplyFailed => {
+                                failures = true;
+                                already_matched = false;
+                            }
+                            TaskStatus::ApplyFailedButAllowed => {
+                                allowed_failures = true;
+                                already_matched = false;
+                            }
+                            _ => {}
+                        }
+                    }
+                    Err(error) => {
+                        return Err(error);
+                    }
                 }
             }
+            
+            if already_matched {
+                self.final_status = HostWorkFlowStatus::AlreadyMatched;
+            } else if allowed_failures {
+                self.final_status = HostWorkFlowStatus::ApplyWithAllowedFailure;
+            } else if failures {
+                self.final_status = HostWorkFlowStatus::ApplyFailed;
+            } else {
+                self.final_status = HostWorkFlowStatus::ApplySuccesful;
+            }
         }
-
         Ok(())
     }
 }
