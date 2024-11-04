@@ -12,7 +12,9 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ServiceBlockExpectedState {
     name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     state: Option<String>, // Either state...
+    #[serde(skip_serializing_if = "Option::is_none")]
     enabled: Option<bool>, // ... or enabled is required.
 }
 

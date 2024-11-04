@@ -12,8 +12,11 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct LineInFileBlockExpectedState {
     filepath: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     line: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     state: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     position: Option<String>, // "top" | "bottom" | "anywhere" (default) | "45" (specific line number)
 
                               // ****** To be implemented ********

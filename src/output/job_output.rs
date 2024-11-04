@@ -3,6 +3,7 @@ use crate::workflow::stepflow::StepFlow;
 use crate::workflow::stepflow::StepStatus;
 use crate::workflow::taskflow::TaskFlow;
 use serde::{Deserialize, Serialize};
+use crate::task::moduleblock::ModuleBlockExpectedState;
 
 // This type is dedicated to being displayed as JSON output of a Job.
 #[derive(Serialize, Deserialize)]
@@ -66,7 +67,7 @@ impl TaskOutput {
 #[derive(Serialize, Deserialize)]
 pub struct StepOutput {
     name: String,
-    expected_state: String,
+    expected_state: ModuleBlockExpectedState,
     status: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     raw_output: Option<String>,
@@ -88,7 +89,7 @@ impl StepOutput {
 
         StepOutput {
             name: step_flow.step_expected.name.as_ref().unwrap().to_string(),
-            expected_state: format!("{:?}", step_flow.step_expected.moduleblock),
+            expected_state: step_flow.step_expected.moduleblock.clone(),
             status: format!("{:?}", step_flow.step_status),
             raw_output,
         }
