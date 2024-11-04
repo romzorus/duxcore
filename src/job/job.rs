@@ -174,13 +174,16 @@ impl Job {
 
         match &mut self.hostworkflow {
             Some(host_work_flow) => {
-                host_work_flow.dry_run(&mut host_handler)?;
+                // host_work_flow.dry_run(&mut host_handler)?;
+                host_work_flow.dry_run(&mut host_handler, &mut self.context)?;
                 self.final_status = host_work_flow.final_status.clone();
             }
             None => {
+                // let mut host_work_flow =
+                //     HostWorkFlow::from(&self.tasklist.as_mut().unwrap(), self.context.clone());
                 let mut host_work_flow =
-                    HostWorkFlow::from(&self.tasklist.as_mut().unwrap(), self.context.clone());
-                host_work_flow.dry_run(&mut host_handler)?;
+                    HostWorkFlow::from(&self.tasklist.as_mut().unwrap());
+                host_work_flow.dry_run(&mut host_handler, &mut self.context)?;
                 self.final_status = host_work_flow.final_status.clone();
                 self.hostworkflow = Some(host_work_flow);
             }
@@ -212,13 +215,15 @@ impl Job {
 
         match &mut self.hostworkflow {
             Some(host_work_flow) => {
-                host_work_flow.apply(&mut host_handler)?;
+                host_work_flow.apply(&mut host_handler, &mut self.context)?;
                 self.final_status = host_work_flow.final_status.clone();
             }
             None => {
+                // let mut host_work_flow =
+                //     HostWorkFlow::from(&self.tasklist.as_mut().unwrap(), self.context.clone());
                 let mut host_work_flow =
-                    HostWorkFlow::from(&self.tasklist.as_mut().unwrap(), self.context.clone());
-                host_work_flow.apply(&mut host_handler)?;
+                    HostWorkFlow::from(&self.tasklist.as_mut().unwrap());
+                host_work_flow.apply(&mut host_handler, &mut self.context)?;
                 self.final_status = host_work_flow.final_status.clone();
                 self.hostworkflow = Some(host_work_flow);
             }

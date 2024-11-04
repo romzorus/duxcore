@@ -11,7 +11,7 @@ use tera::Context;
 pub struct HostWorkFlow {
     pub task_flows: Vec<TaskFlow>,
     pub final_status: HostWorkFlowStatus,
-    pub dux_context: DuxContext,
+    // pub dux_context: DuxContext,
 }
 
 impl HostWorkFlow {
@@ -19,11 +19,12 @@ impl HostWorkFlow {
         HostWorkFlow {
             task_flows: Vec::new(),
             final_status: HostWorkFlowStatus::NotRunYet,
-            dux_context: DuxContext::new(),
+            // dux_context: DuxContext::new(),
         }
     }
 
-    pub fn from(task_list: &TaskList, dux_context: DuxContext) -> HostWorkFlow {
+    // pub fn from(task_list: &TaskList, dux_context: DuxContext) -> HostWorkFlow {
+    pub fn from(task_list: &TaskList) -> HostWorkFlow {
         let mut task_flows: Vec<TaskFlow> = Vec::new();
 
         for task_block in task_list.tasks.iter() {
@@ -33,15 +34,15 @@ impl HostWorkFlow {
         HostWorkFlow {
             task_flows,
             final_status: HostWorkFlowStatus::NotRunYet,
-            dux_context,
+            // dux_context,
         }
     }
 
-    pub fn dry_run(&mut self, hosthandler: &mut HostHandler) -> Result<(), Error> {
+    pub fn dry_run(&mut self, hosthandler: &mut HostHandler, dux_context: &mut DuxContext) -> Result<(), Error> {
         let mut changes_required = false;
 
         for task_flow in self.task_flows.iter_mut() {
-            match task_flow.dry_run(hosthandler, &mut self.dux_context) {
+            match task_flow.dry_run(hosthandler, dux_context) {
                 Ok(()) => {
                     if let TaskStatus::ChangeRequired = task_flow.task_status {
                         changes_required = true;
@@ -61,7 +62,8 @@ impl HostWorkFlow {
 
         Ok(())
     }
-    pub fn apply(&mut self, hosthandler: &mut HostHandler) -> Result<(), Error> {
+    // pub fn apply(&mut self, hosthandler: &mut HostHandler) -> Result<(), Error> {
+    pub fn apply(&mut self, hosthandler: &mut HostHandler, dux_context: &mut DuxContext) -> Result<(), Error> {
         if let HostWorkFlowStatus::AlreadyMatched = self.final_status {
             // Nothing to do, dry_run was performed before and concluded that nothing is to be
         } else {
@@ -70,7 +72,7 @@ impl HostWorkFlow {
             let mut failures = false;
 
             for task_flow in self.task_flows.iter_mut() {
-                match task_flow.apply(hosthandler, &mut self.dux_context) {
+                match task_flow.apply(hosthandler, dux_context) {
                     Ok(()) => match task_flow.task_status {
                         TaskStatus::ApplySuccesful => {
                             already_matched = false;
