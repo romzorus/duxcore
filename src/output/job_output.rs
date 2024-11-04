@@ -2,6 +2,7 @@ use serde::{Serialize, Deserialize};
 use crate::job::job::Job;
 use crate::workflow::stepflow::StepFlow;
 use crate::workflow::taskflow::TaskFlow;
+use crate::workflow::hostworkflow::HostWorkFlowStatus;
 
 // This type is dedicated to being displayed as JSON output of a Job.
 #[derive(Serialize, Deserialize)]
@@ -9,7 +10,7 @@ pub struct JobOutput {
     host: String,
     timestamp_start: String,
     timestamp_end: String,
-    status: String,
+    final_status: String,
     tasks: Vec<TaskOutput>
 }
 
@@ -19,7 +20,7 @@ impl JobOutput {
             host: String::new(),
             timestamp_start: String::new(),
             timestamp_end: String::new(),
-            status: String::new(),
+            final_status: String::new(),
             tasks: Vec::new()
         }
     }
@@ -30,7 +31,7 @@ impl JobOutput {
         job_output.host = job.get_address().unwrap();
         job_output.timestamp_start = job.timestamp_start.as_ref().unwrap().to_string();
         job_output.timestamp_end =job.timestamp_end.as_ref().unwrap().to_string();
-        job_output.status = format!("{:?}", job.final_status);
+        job_output.final_status = format!("{:?}", job.hostworkflow.as_ref().unwrap().final_status);
 
         let mut tasks_output: Vec<TaskOutput> = Vec::new();
         for task_flow in job.hostworkflow.as_ref().unwrap().clone().task_flows {

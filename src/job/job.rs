@@ -14,6 +14,7 @@ use machineid_rs::{Encryption, HWIDComponent, IdBuilder};
 use std::time::SystemTime;
 use chrono::{Utc, DateTime};
 use crate::output::job_output::JobOutput;
+use crate::workflow::hostworkflow::HostWorkFlowStatus;
 
 #[derive(Debug, Clone)]
 pub struct Job {
@@ -25,7 +26,7 @@ pub struct Job {
     pub timestamp_start: Option<String>,
     pub timestamp_end: Option<String>,
     pub hostworkflow: Option<HostWorkFlow>,
-    pub final_status: JobFinalStatus
+    pub final_status: HostWorkFlowStatus
 }
 
 impl Job {
@@ -39,7 +40,7 @@ impl Job {
             timestamp_start: None,
             timestamp_end: None,
             hostworkflow: None,
-            final_status: JobFinalStatus::Unset
+            final_status: HostWorkFlowStatus::NotRunYet
         }
     }
 
@@ -181,10 +182,12 @@ impl Job {
         match &mut self.hostworkflow {
             Some(host_work_flow) => {
                 host_work_flow.dry_run(&mut host_handler)?;
+                self.final_status = host_work_flow.final_status.clone();
             }
             None => {
                 let mut host_work_flow = HostWorkFlow::from(&self.tasklist.as_mut().unwrap(), self.context.clone());
                 host_work_flow.dry_run(&mut host_handler)?;
+                self.final_status = host_work_flow.final_status.clone();
                 self.hostworkflow = Some(host_work_flow);
             }
         }
@@ -222,10 +225,12 @@ impl Job {
         match &mut self.hostworkflow {
             Some(host_work_flow) => {
                 host_work_flow.apply(&mut host_handler)?;
+                self.final_status = host_work_flow.final_status.clone();
             }
             None => {
                 let mut host_work_flow = HostWorkFlow::from(&self.tasklist.as_mut().unwrap(), self.context.clone());
                 host_work_flow.apply(&mut host_handler)?;
+                self.final_status = host_work_flow.final_status.clone();
                 self.hostworkflow = Some(host_work_flow);
             }
         }
