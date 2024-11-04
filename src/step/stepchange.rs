@@ -76,21 +76,23 @@ impl StepChange {
         };
 
         let mut step_result = StepResult::new();
-        
+
         // As JSON doesn't allow control characters in String fields, they need to be removed/replaced by spaces.
         // Otherwise, Tera can't display these fields.
         for result in raw_step_result.apicallresults.iter() {
-            step_result.apicallresults.push(
-                ApiCallResult {
-                    rc: result.rc,
-                    output: match &result.output { Some(content) => {
-                        Some(content.chars()
-                            .map(|x| if x.is_control() { ' ' } else { x }
-                            ).collect())
-                     } None => None},
-                    status: result.status.clone()
-                }
-            )
+            step_result.apicallresults.push(ApiCallResult {
+                rc: result.rc,
+                output: match &result.output {
+                    Some(content) => Some(
+                        content
+                            .chars()
+                            .map(|x| if x.is_control() { ' ' } else { x })
+                            .collect(),
+                    ),
+                    None => None,
+                },
+                status: result.status.clone(),
+            })
         }
 
         return step_result;

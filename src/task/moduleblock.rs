@@ -1,12 +1,12 @@
-use serde::{Deserialize, Serialize};
-use tera::Tera;
-use crate::step::stepchange::StepChange;
 use crate::connection::hosthandler::HostHandler;
 use crate::connection::specification::Privilege;
 use crate::error::Error;
 use crate::modules::prelude::*;
 use crate::result::apicallresult::ApiCallResult;
+use crate::step::stepchange::StepChange;
 use crate::workflow::hostworkflow::DuxContext;
+use serde::{Deserialize, Serialize};
+use tera::Tera;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -28,19 +28,18 @@ impl ModuleBlockExpectedState {
         ModuleBlockExpectedState::None
     }
 
-    pub fn consider_context(&mut self, dux_context: &mut DuxContext) -> Result<ModuleBlockExpectedState, Error> {
-
+    pub fn consider_context(
+        &mut self,
+        dux_context: &mut DuxContext,
+    ) -> Result<ModuleBlockExpectedState, Error> {
         // TODO : is this the best way to do this ?
         let serialized_self = serde_json::to_string(self).unwrap();
         // let context_wise_serialized_self = dux_context.tera_interface.render_str(&serialized_self, &dux_context.tera_context).unwrap();
-        let context_wise_serialized_self = Tera::one_off(serialized_self.as_str(), &dux_context.tera_context, true).unwrap();
+        let context_wise_serialized_self =
+            Tera::one_off(serialized_self.as_str(), &dux_context.tera_context, true).unwrap();
         match serde_json::from_str::<ModuleBlockExpectedState>(&context_wise_serialized_self) {
             Ok(context_wise_moduleblock) => Ok(context_wise_moduleblock),
-            Err(error) => {
-                Err(Error::FailureToParseContent(
-                    format!("{}", error)
-                ))
-            }
+            Err(error) => Err(Error::FailureToParseContent(format!("{}", error))),
         }
     }
 

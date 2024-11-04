@@ -24,16 +24,8 @@ impl ApiCallResult {
         }
     }
 
-    pub fn from(
-        rc: Option<i32>,
-        output: Option<String>,
-        status: ApiCallStatus,
-    ) -> ApiCallResult {
-        ApiCallResult {
-            rc,
-            output,
-            status,
-        }
+    pub fn from(rc: Option<i32>, output: Option<String>, status: ApiCallStatus) -> ApiCallResult {
+        ApiCallResult { rc, output, status }
     }
 }
 

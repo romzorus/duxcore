@@ -1,6 +1,4 @@
-use crate::connection::hosthandler::HostHandler;
 use crate::error::Error;
-use crate::host::hosts::Host;
 use crate::task::contentformat::json::json_tasklist_parser;
 use crate::task::contentformat::yaml::yaml_tasklist_parser;
 use crate::task::taskblock::TaskBlock;
@@ -20,10 +18,7 @@ impl TaskList {
     pub fn from(tasks: Vec<TaskBlock>) -> TaskList {
         TaskList { tasks }
     }
-    pub fn from_str(
-        raw_content: &str,
-        content_type: TaskListFileType
-    ) -> Result<TaskList, Error> {
+    pub fn from_str(raw_content: &str, content_type: TaskListFileType) -> Result<TaskList, Error> {
         match content_type {
             TaskListFileType::Yaml => yaml_tasklist_parser(raw_content),
             TaskListFileType::Json => json_tasklist_parser(raw_content),
@@ -48,10 +43,7 @@ impl TaskList {
             }
         }
     }
-    pub fn from_file(
-        file_path: &str,
-        file_type: TaskListFileType
-    ) -> Result<TaskList, Error> {
+    pub fn from_file(file_path: &str, file_type: TaskListFileType) -> Result<TaskList, Error> {
         match std::fs::read_to_string(file_path) {
             Ok(file_content) => {
                 return TaskList::from_str(&file_content, file_type);
@@ -64,19 +56,6 @@ impl TaskList {
             }
         }
     }
-    // pub fn dry_run_tasklist(&self, hosthandler: &mut HostHandler) -> Result<ChangeList, Error> {
-    //     let mut list: Vec<TaskChange> = Vec::new();
-
-    //     for taskcontent in self.tasks.clone().iter() {
-    //         match taskcontent.dry_run_task(hosthandler) {
-    //             Ok(taskchange) => {
-    //                 list.push(taskchange);
-    //             }
-    //             Err(e) => return Err(e),
-    //         }
-    //     }
-    //     return Ok(ChangeList::from(Some(list), hosthandler.clone()));
-    // }
 }
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]

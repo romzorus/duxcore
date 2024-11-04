@@ -1,10 +1,10 @@
-use crate::workflow::taskflow::{TaskFlow, TaskStatus};
-use crate::task::tasklist::TaskList;
 use crate::connection::hosthandler::HostHandler;
-use std::collections::HashMap;
-use crate::host::hosts::Host;
 use crate::error::Error;
+use crate::host::hosts::Host;
+use crate::task::tasklist::TaskList;
+use crate::workflow::taskflow::{TaskFlow, TaskStatus};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use tera::Context;
 
 #[derive(Debug, Clone)]
@@ -62,7 +62,6 @@ impl HostWorkFlow {
         Ok(())
     }
     pub fn apply(&mut self, hosthandler: &mut HostHandler) -> Result<(), Error> {
-
         if let HostWorkFlowStatus::AlreadyMatched = self.final_status {
             // Nothing to do, dry_run was performed before and concluded that nothing is to be
         } else {
@@ -72,29 +71,27 @@ impl HostWorkFlow {
 
             for task_flow in self.task_flows.iter_mut() {
                 match task_flow.apply(hosthandler, &mut self.dux_context) {
-                    Ok(()) => {
-                        match task_flow.task_status {
-                            TaskStatus::ApplySuccesful => {
-                                already_matched = false;
-                                }
-                            TaskStatus::AlreadyMatched => {}
-                            TaskStatus::ApplyFailed => {
-                                failures = true;
-                                already_matched = false;
-                            }
-                            TaskStatus::ApplyFailedButAllowed => {
-                                allowed_failures = true;
-                                already_matched = false;
-                            }
-                            _ => {}
+                    Ok(()) => match task_flow.task_status {
+                        TaskStatus::ApplySuccesful => {
+                            already_matched = false;
                         }
-                    }
+                        TaskStatus::AlreadyMatched => {}
+                        TaskStatus::ApplyFailed => {
+                            failures = true;
+                            already_matched = false;
+                        }
+                        TaskStatus::ApplyFailedButAllowed => {
+                            allowed_failures = true;
+                            already_matched = false;
+                        }
+                        _ => {}
+                    },
                     Err(error) => {
                         return Err(error);
                     }
                 }
             }
-            
+
             if already_matched {
                 self.final_status = HostWorkFlowStatus::AlreadyMatched;
             } else if allowed_failures {
@@ -123,14 +120,14 @@ pub enum HostWorkFlowStatus {
 #[derive(Clone, Debug)]
 pub struct DuxContext {
     pub vars: HashMap<String, String>,
-    pub tera_context: Context
+    pub tera_context: Context,
 }
 
 impl DuxContext {
     pub fn new() -> DuxContext {
         DuxContext {
             vars: HashMap::new(),
-            tera_context: Context::new()
+            tera_context: Context::new(),
         }
     }
 
@@ -138,7 +135,7 @@ impl DuxContext {
         match host.vars {
             Some(vars) => DuxContext {
                 vars: vars.clone(),
-                tera_context: Context::from_serialize(vars).unwrap()
+                tera_context: Context::from_serialize(vars).unwrap(),
             },
             None => DuxContext::new(),
         }

@@ -1,8 +1,8 @@
-use crate::step::stepchange::StepChange;
 use crate::connection::hosthandler::HostHandler;
 use crate::connection::specification::Privilege;
 use crate::error::Error;
 use crate::result::apicallresult::{ApiCallResult, ApiCallStatus};
+use crate::step::stepchange::StepChange;
 use crate::task::moduleblock::ModuleApiCall;
 use crate::task::moduleblock::{Apply, DryRun};
 use serde::{Deserialize, Serialize};
@@ -19,7 +19,6 @@ impl DryRun for DebugBlockExpectedState {
         hosthandler: &mut HostHandler,
         privilege: Privilege,
     ) -> Result<StepChange, Error> {
-        
         return Ok(StepChange::matched(self.msg.as_str()));
     }
 }

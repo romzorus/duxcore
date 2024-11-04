@@ -48,32 +48,28 @@ impl HostHandler {
         HostHandler {
             connectionmode: ConnectionMode::Unset,
             localhost: None,
-            ssh2: None
+            ssh2: None,
         }
     }
 
-    pub fn from(address: String, host_connection_info: HostConnectionInfo) -> Result<HostHandler, Error> {
-
+    pub fn from(
+        address: String,
+        host_connection_info: HostConnectionInfo,
+    ) -> Result<HostHandler, Error> {
         match host_connection_info {
-            HostConnectionInfo::Unset => {
-                Err(Error::MissingInitialization(
-                    "Host connection info is still unset. Unable to build a HostHandler.".into()
-                ))
-            }
-            HostConnectionInfo::LocalHost(which_user) => {
-                Ok(HostHandler {
-                    connectionmode: ConnectionMode::LocalHost,
-                    localhost: Some(LocalHostHandler::from(which_user)),
-                    ssh2: None
-                })
-            }
-            HostConnectionInfo::Ssh2(ssh2_auth_mode) => {
-                Ok(HostHandler {
-                    connectionmode: ConnectionMode::Ssh2,
-                    localhost: None,
-                    ssh2: Some(Ssh2HostHandler::from(address, ssh2_auth_mode))
-                })
-            }
+            HostConnectionInfo::Unset => Err(Error::MissingInitialization(
+                "Host connection info is still unset. Unable to build a HostHandler.".into(),
+            )),
+            HostConnectionInfo::LocalHost(which_user) => Ok(HostHandler {
+                connectionmode: ConnectionMode::LocalHost,
+                localhost: Some(LocalHostHandler::from(which_user)),
+                ssh2: None,
+            }),
+            HostConnectionInfo::Ssh2(ssh2_auth_mode) => Ok(HostHandler {
+                connectionmode: ConnectionMode::Ssh2,
+                localhost: None,
+                ssh2: Some(Ssh2HostHandler::from(address, ssh2_auth_mode)),
+            }),
         }
     }
 

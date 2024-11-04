@@ -1,12 +1,11 @@
-use crate::error::Error;
-use crate::task::step::Step;
-use crate::step::stepchange::StepChange;
-use crate::step::stepresult::StepResult;
 use crate::connection::hosthandler::HostHandler;
 use crate::connection::specification::Privilege;
+use crate::error::Error;
 use crate::result::apicallresult::ApiCallStatus;
+use crate::step::stepchange::StepChange;
+use crate::step::stepresult::StepResult;
+use crate::task::step::Step;
 use crate::workflow::hostworkflow::DuxContext;
-
 
 #[derive(Debug, Clone)]
 pub struct StepFlow {
@@ -31,7 +30,11 @@ impl StepFlow {
         }
     }
 
-    pub fn dry_run(&mut self, hosthandler: &mut HostHandler, dux_context: &mut DuxContext) -> Result<(), Error> {
+    pub fn dry_run(
+        &mut self,
+        hosthandler: &mut HostHandler,
+        dux_context: &mut DuxContext,
+    ) -> Result<(), Error> {
         let privilege = match self.step_expected.with_sudo {
             None => match &self.step_expected.run_as {
                 None => Privilege::Usual,
@@ -52,7 +55,8 @@ impl StepFlow {
         match self
             .step_expected
             .moduleblock
-            .consider_context(dux_context).unwrap() // TODO : If register of a step is used in another step later, dry_run is impossible -> handle this case
+            .consider_context(dux_context)
+            .unwrap() // TODO : If register of a step is used in another step later, dry_run is impossible -> handle this case
             .dry_run_moduleblock(hosthandler, privilege)
         {
             Ok(mbchange) => {
@@ -73,8 +77,11 @@ impl StepFlow {
 
         Ok(())
     }
-    pub fn apply(&mut self, hosthandler: &mut HostHandler, dux_context: &mut DuxContext) -> Result<(), Error> {
-
+    pub fn apply(
+        &mut self,
+        hosthandler: &mut HostHandler,
+        dux_context: &mut DuxContext,
+    ) -> Result<(), Error> {
         let privilege = match self.step_expected.with_sudo {
             None => match &self.step_expected.run_as {
                 None => Privilege::Usual,
@@ -96,7 +103,8 @@ impl StepFlow {
         match self
             .step_expected
             .moduleblock
-            .consider_context(dux_context).unwrap()
+            .consider_context(dux_context)
+            .unwrap()
             .dry_run_moduleblock(hosthandler, privilege)
         {
             Ok(mbchange) => {

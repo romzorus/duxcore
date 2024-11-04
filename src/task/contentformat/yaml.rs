@@ -4,7 +4,6 @@ use crate::task::tasklist::TaskList;
 use serde_yaml;
 
 pub fn yaml_tasklist_parser(tasklistcontent: &str) -> Result<TaskList, Error> {
-
     match serde_yaml::from_str::<Vec<ParsingTaskBlock>>(tasklistcontent) {
         Ok(parsed_content) => {
             let mut tasks: Vec<TaskBlock> = Vec::new();
