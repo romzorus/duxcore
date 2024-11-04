@@ -3,6 +3,7 @@ use crate::job::job::Job;
 use crate::workflow::stepflow::StepFlow;
 use crate::workflow::taskflow::TaskFlow;
 use crate::workflow::hostworkflow::HostWorkFlowStatus;
+use crate::workflow::stepflow::StepStatus;
 
 // This type is dedicated to being displayed as JSON output of a Job.
 #[derive(Serialize, Deserialize)]
@@ -72,15 +73,29 @@ impl TaskOutput {
 pub struct StepOutput {
     name: String,
     expected_state: String,
-    status: String
+    status: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    raw_output: Option<String>
 }
 
 impl StepOutput {
     pub fn from_stepflow(step_flow: &StepFlow) -> StepOutput {
+        let raw_output = match step_flow.step_status {
+            StepStatus::ApplyFailed => {
+                let mut api_call_results_output = String::new();
+                for api_call_result in step_flow.step_result.clone().unwrap().apicallresults {
+                    api_call_results_output.push_str(format!("{}\n", api_call_result.output.unwrap()).as_str());
+                }
+                Some(api_call_results_output)
+            }
+            _ => { None }
+        };
+
         StepOutput {
             name: step_flow.step_expected.name.as_ref().unwrap().to_string(),
             expected_state: format!("{:?}", step_flow.step_expected.moduleblock),
-            status: format!("{:?}", step_flow.step_status)
+            status: format!("{:?}", step_flow.step_status),
+            raw_output
         }
     }
 }
