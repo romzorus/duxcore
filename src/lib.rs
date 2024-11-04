@@ -5,89 +5,53 @@
 //!
 //! A [*book*](https://www.dux-automate.org/book/) has been opened about the Dux project. Especially, modules list and documentation can be found [here](https://www.dux-automate.org/book/modules.html).
 //!
-//! # Principle
-//!
-//! Based on Rust's type system, the workflow is as follows :
-//! 1. Get a task list : what is the expected state of the managed hosts ? This step produces a `TaskList` struct.
-//! 2. Get a hosts list : which hosts are under the scope of this task list ? This step produces a `HostList` struct.
-//! 3. Generate `Assignments` : an `Assignment` represents a host and allows to track what happens to this host. It contains everything needed to handle the host and apply the expected state.
-//! 4. Dry run : dry run each `Assignment`. This step produces a `ChangeList` struct which contains what needs to be done on the host to reach the expected state.
-//! 5. Apply : actually apply the changes on the host to reach the expected state. This step produces a `ResultList` struct.
-//!
-//!
-//! # Usage
-//! Import the crate
-//!
-//! ```shell
-//! cargo add duxcore
-//! ```
-//! Now let's perform the usual example : **setup a webserver** (but, this time, right from your Rust code !)
+//! # Most basic example : install a web server
 //! ```rust
-//! use duxcore::prelude::*;
-//! use std::path::PathBuf;
+//!use duxcore::prelude::*;
 //!
-//! fn main() {
-//!     // First we define all required components :
-//!     // --> a 'Host'
-//!     let mut target_host = Host::from_string("host-address".into());
-//!     target_host.add_var("package_name", "apache2");
+//!fn main() {
 //!
-//!     // --> connection details
-//!     let ssh2_connection_details = Ssh2ConnectionDetails::from(
-//!         target_host.address.clone(),
-//!         Ssh2AuthMode::KeyFile((
-//!             "username".into(),
-//!             PathBuf::from("/path/to/private/key"),
-//!         )),
-//!     );
+//!    // First we need to define what the expected state of the target host is.
+//!    let my_tasklist = "---
+//!- name: Let's install a web server !
+//!  steps:
+//!    - name: First, we test the connectivity and authentication with the host.
+//!      ping:
+//!      
+//!    - name: Then we can install the package...
+//!      with_sudo: true
+//!      apt:
+//!        package: '{{ package_name }}'
+//!        state: present
+//!        
+//!    - name: ... and start & enable the service.
+//!      with_sudo: true
+//!      service:
+//!        name: '{{ service_name }}'
+//!        state: started
+//!        enabled: true
+//!        ";
 //!
-//!     // --> a 'HostHandler' based on a Host and its connection details
-//!     let mut host_handler = HostHandler::from(&HostHandlingInfo::from(
-//!         ConnectionMode::Ssh2,
-//!         target_host.address.clone(),
-//!         ConnectionDetails::Ssh2(ssh2_connection_details),
-//!     ))
-//!     .unwrap();
+//!    // Then we create a 'Job'.
+//!    let mut my_job = Job::new();
 //!
-//!     // --> a 'TaskList' describing the expected state of this host
-//!     let tasklist_content = "
-//! - name: Install apache web server
-//!   steps:
-//!     - name: Package installation
-//!       with_sudo: true
-//!       apt:
-//!         package: \"{{ package_name }}\"
-//!         state: present
+//!    // We set who the target host of this Job is, and how to connect to it.
+//!    my_job
+//!        .set_address("10.20.0.203").unwrap()
+//!        .set_connection(HostConnectionInfo::ssh2_with_key_file("dux", "controller_key")).unwrap();
+//!    
+//!    // We give it some context and the task list.
+//!    my_job
+//!        .set_var("package_name", "apache2")
+//!        .set_var("service_name", "apache2")
+//!        .set_tasklist_from_str(my_tasklist, TaskListFileType::Yaml).unwrap()
+//!    ;
+//!    // We can finally apply the task list to this host.
+//!    my_job.apply();
 //!
-//!     - name: Start and enable the service
-//!       with_sudo: true
-//!       service:
-//!         name: apache2
-//!         state: started
-//!         enabled: true
-//!
-//!     - name: Finally, enable some website
-//!       with_sudo: true
-//!       command:
-//!         content: a2ensite /path/to/my/site/configuration/file";
-//!
-//!     let task_list: TaskList = TaskList::from_str(
-//!         tasklist_content,
-//!         TaskListFileType::Yaml,
-//!         &target_host) // 'Host' is given to take variables into account
-//!         .unwrap();
-//!
-//!     // Then we actually use them :
-//!     // --> SSH2 connection needs to be initialized
-//!     host_handler.init();
-//!
-//!     // --> Evaluate what needs to be done on the host to meet the expected state
-//!     let mut change_list: ChangeList = task_list.dry_run_tasklist(&mut host_handler).unwrap();
-//!
-//!     // --> Apply the required changes and have the host reach the expected state
-//!     // Won't do anything (not even try to connect) if 'ChangeList' is empty (meaning the host is already in the expected state)
-//!     let result_list: ResultList = change_list.apply_changelist(&mut host_handler);
-//! }
+//!    // Let's see the result.
+//!    println!("{}", my_job.display_pretty());
+//!}
 //! ```
 
 pub mod connection;
