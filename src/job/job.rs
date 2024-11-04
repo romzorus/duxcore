@@ -156,7 +156,7 @@ impl Job {
         host_handler.init();
 
         self.timestamp_start = Some(
-            format!("{}", Utc::now().format("%Y-%m-%d %H:%M:%S").to_string())
+            format!("{}", Utc::now().format("%+").to_string())
         );
 
         match &mut self.hostworkflow {
@@ -171,7 +171,7 @@ impl Job {
         }
 
         self.timestamp_end = Some(
-            format!("{}", Utc::now().format("%Y-%m-%d %H:%M:%S").to_string())
+            format!("{}", Utc::now().format("%+").to_string())
         );
 
         Ok(())
@@ -197,7 +197,7 @@ impl Job {
         host_handler.init();
 
         self.timestamp_start = Some(
-            format!("{}", Utc::now().format("%Y-%m-%d %H:%M:%S").to_string())
+            format!("{}", Utc::now().format("%+").to_string())
         );
 
         match &mut self.hostworkflow {
@@ -212,7 +212,7 @@ impl Job {
         }
 
         self.timestamp_end = Some(
-            format!("{}", Utc::now().format("%Y-%m-%d %H:%M:%S").to_string())
+            format!("{}", Utc::now().format("%+").to_string())
         );
 
         Ok(())
