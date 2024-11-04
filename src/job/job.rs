@@ -143,12 +143,14 @@ impl Job {
         }
     }
 
-    pub fn set_context(&mut self, context: DuxContext) {
+    pub fn set_context(&mut self, context: DuxContext) -> &mut Self {
         self.context = context;
+        self
     }
 
-    pub fn set_var(&mut self, key: &str, value: &str) {
+    pub fn set_var(&mut self, key: &str, value: &str) -> &mut Self {
         self.context.set_var(key, value);
+        self
     }
 
     /// "DRY_RUN" this job -> evaluate the difference between the expected state and the actual state of the given host
