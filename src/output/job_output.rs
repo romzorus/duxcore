@@ -4,6 +4,7 @@ use crate::workflow::stepflow::StepStatus;
 use crate::workflow::taskflow::TaskFlow;
 use serde::{Deserialize, Serialize};
 use crate::task::moduleblock::ModuleBlockExpectedState;
+use crate::workflow::hostworkflow::DuxContext;
 
 // This type is dedicated to being displayed as JSON output of a Job.
 #[derive(Serialize, Deserialize)]
@@ -26,7 +27,7 @@ impl JobOutput {
         }
     }
 
-    pub fn from_job(job: &Job) -> JobOutput {
+    pub fn from_job(job: &mut Job) -> JobOutput {
         let mut job_output = JobOutput::new();
 
         job_output.host = job.get_address().unwrap();
@@ -36,7 +37,7 @@ impl JobOutput {
 
         let mut tasks_output: Vec<TaskOutput> = Vec::new();
         for task_flow in job.hostworkflow.as_ref().unwrap().clone().task_flows {
-            tasks_output.push(TaskOutput::from_taskflow(&task_flow));
+            tasks_output.push(TaskOutput::from_taskflow(&task_flow, &mut job.context));
         }
         job_output.tasks = tasks_output;
 
@@ -51,10 +52,10 @@ pub struct TaskOutput {
 }
 
 impl TaskOutput {
-    pub fn from_taskflow(task_flow: &TaskFlow) -> TaskOutput {
+    pub fn from_taskflow(task_flow: &TaskFlow, dux_context: &mut DuxContext) -> TaskOutput {
         let mut steps_output: Vec<StepOutput> = Vec::new();
         for step_flow in task_flow.step_flows.clone() {
-            steps_output.push(StepOutput::from_stepflow(&step_flow));
+            steps_output.push(StepOutput::from_stepflow(&step_flow, dux_context));
         }
 
         TaskOutput {
@@ -74,7 +75,7 @@ pub struct StepOutput {
 }
 
 impl StepOutput {
-    pub fn from_stepflow(step_flow: &StepFlow) -> StepOutput {
+    pub fn from_stepflow(step_flow: &StepFlow, dux_context: &mut DuxContext) -> StepOutput {
         let raw_output = match step_flow.step_status {
             StepStatus::ApplyFailed => {
                 let mut api_call_results_output = String::new();
@@ -89,7 +90,7 @@ impl StepOutput {
 
         StepOutput {
             name: step_flow.step_expected.name.as_ref().unwrap().to_string(),
-            expected_state: step_flow.step_expected.moduleblock.clone(),
+            expected_state: step_flow.step_expected.moduleblock.clone().consider_context(dux_context).unwrap(),
             status: format!("{:?}", step_flow.step_status),
             raw_output,
         }

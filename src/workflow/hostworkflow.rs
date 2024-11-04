@@ -11,7 +11,6 @@ use tera::Context;
 pub struct HostWorkFlow {
     pub task_flows: Vec<TaskFlow>,
     pub final_status: HostWorkFlowStatus,
-    // pub dux_context: DuxContext,
 }
 
 impl HostWorkFlow {
@@ -19,7 +18,6 @@ impl HostWorkFlow {
         HostWorkFlow {
             task_flows: Vec::new(),
             final_status: HostWorkFlowStatus::NotRunYet,
-            // dux_context: DuxContext::new(),
         }
     }
 
@@ -34,7 +32,6 @@ impl HostWorkFlow {
         HostWorkFlow {
             task_flows,
             final_status: HostWorkFlowStatus::NotRunYet,
-            // dux_context,
         }
     }
 
@@ -144,7 +141,6 @@ impl DuxContext {
     }
 
     pub fn set_var(&mut self, key: &str, value: &str) {
-        // self.vars.insert(key.to_string(), value.to_string());
         self.tera_context.insert(key, value);
     }
 }

@@ -1,9 +1,6 @@
 use crate::connection::host_connection::HostConnectionInfo;
 pub use crate::connection::hosthandler::HostHandler;
-use crate::connection::hosthandler::HostHandlingInfo;
-use crate::connection::specification::ConnectionMode;
 use crate::error::Error;
-use crate::host::hostlist::HostList;
 use crate::output::job_output::JobOutput;
 use crate::task::tasklist::TaskList;
 use crate::task::tasklist::TaskListFileType;
@@ -174,13 +171,10 @@ impl Job {
 
         match &mut self.hostworkflow {
             Some(host_work_flow) => {
-                // host_work_flow.dry_run(&mut host_handler)?;
                 host_work_flow.dry_run(&mut host_handler, &mut self.context)?;
                 self.final_status = host_work_flow.final_status.clone();
             }
             None => {
-                // let mut host_work_flow =
-                //     HostWorkFlow::from(&self.tasklist.as_mut().unwrap(), self.context.clone());
                 let mut host_work_flow =
                     HostWorkFlow::from(&self.tasklist.as_mut().unwrap());
                 host_work_flow.dry_run(&mut host_handler, &mut self.context)?;
@@ -219,8 +213,6 @@ impl Job {
                 self.final_status = host_work_flow.final_status.clone();
             }
             None => {
-                // let mut host_work_flow =
-                //     HostWorkFlow::from(&self.tasklist.as_mut().unwrap(), self.context.clone());
                 let mut host_work_flow =
                     HostWorkFlow::from(&self.tasklist.as_mut().unwrap());
                 host_work_flow.apply(&mut host_handler, &mut self.context)?;
@@ -234,12 +226,12 @@ impl Job {
         Ok(())
     }
 
-    pub fn display(&self) -> String {
+    pub fn display(&mut self) -> String {
         let job_output = JobOutput::from_job(self);
         serde_json::to_string(&job_output).unwrap()
     }
 
-    pub fn display_pretty(&self) -> String {
+    pub fn display_pretty(&mut self) -> String {
         let job_output = JobOutput::from_job(self);
         serde_json::to_string_pretty(&job_output).unwrap()
     }
