@@ -147,6 +147,10 @@ impl Job {
         self.context = context;
     }
 
+    pub fn set_var(&mut self, key: &str, value: &str) {
+        self.context.set_var(key, value);
+    }
+
     /// "DRY_RUN" this job -> evaluate the difference between the expected state and the actual state of the given host
     pub fn dry_run(&mut self) -> Result<(), Error> {
         // Build a HostHandler
