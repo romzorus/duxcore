@@ -13,18 +13,19 @@ use sha2::{Digest, Sha256};
 use machineid_rs::{Encryption, HWIDComponent, IdBuilder};
 use std::time::SystemTime;
 use chrono::{Utc, DateTime};
+use crate::output::job_output::JobOutput;
 
 #[derive(Debug, Clone)]
 pub struct Job {
-    address: HostAddress,
-    host_connection_info: HostConnectionInfo,
-    correlation_id: Option<String>,
-    tasklist: Option<TaskList>,
-    context: DuxContext,
-    timestamp_start: Option<String>,
-    timestamp_end: Option<String>,
-    hostworkflow: Option<HostWorkFlow>,
-    final_status: JobFinalStatus
+    pub address: HostAddress,
+    pub host_connection_info: HostConnectionInfo,
+    pub correlation_id: Option<String>,
+    pub tasklist: Option<TaskList>,
+    pub context: DuxContext,
+    pub timestamp_start: Option<String>,
+    pub timestamp_end: Option<String>,
+    pub hostworkflow: Option<HostWorkFlow>,
+    pub final_status: JobFinalStatus
 }
 
 impl Job {
@@ -39,6 +40,24 @@ impl Job {
             timestamp_end: None,
             hostworkflow: None,
             final_status: JobFinalStatus::Unset
+        }
+    }
+
+    pub fn get_address(&self) -> Result<String, Error> {
+        match &self.address {
+            HostAddress::LocalHost => {
+                Ok("localhost".to_string())
+            }
+            HostAddress::RemoteHost(address) => {
+                Ok(address.to_string())
+            }
+            HostAddress::Unset => {
+                Err(
+                    Error::MissingInitialization(
+                        format!("Unset address")
+                    )
+                )
+            }
         }
     }
 
@@ -216,6 +235,16 @@ impl Job {
         );
 
         Ok(())
+    }
+
+    pub fn display(&self) -> String {
+        let job_output = JobOutput::from_job(self);
+        serde_json::to_string(&job_output).unwrap()
+    }
+
+    pub fn display_pretty(&self) -> String {
+        let job_output = JobOutput::from_job(self);
+        serde_json::to_string_pretty(&job_output).unwrap()
     }
 }
 
