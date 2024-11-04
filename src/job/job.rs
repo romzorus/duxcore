@@ -12,6 +12,7 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use machineid_rs::{Encryption, HWIDComponent, IdBuilder};
 use std::time::SystemTime;
+use chrono::{Utc, DateTime};
 
 #[derive(Debug, Clone)]
 pub struct Job {
@@ -136,6 +137,7 @@ impl Job {
 
     /// "DRY_RUN" this job -> evaluate the difference between the expected state and the actual state of the given host
     pub fn dry_run(&mut self) -> Result<(), Error> {
+
         // Build a HostHandler
         let mut host_handler = match &self.address {
             HostAddress::Unset => {
@@ -151,6 +153,12 @@ impl Job {
             }
         };
 
+        host_handler.init();
+
+        self.timestamp_start = Some(
+            format!("{}", Utc::now().format("%Y-%m-%d %H:%M:%S").to_string())
+        );
+
         match &mut self.hostworkflow {
             Some(host_work_flow) => {
                 host_work_flow.dry_run(&mut host_handler)?;
@@ -161,6 +169,10 @@ impl Job {
                 self.hostworkflow = Some(host_work_flow);
             }
         }
+
+        self.timestamp_end = Some(
+            format!("{}", Utc::now().format("%Y-%m-%d %H:%M:%S").to_string())
+        );
 
         Ok(())
     }
@@ -184,6 +196,10 @@ impl Job {
 
         host_handler.init();
 
+        self.timestamp_start = Some(
+            format!("{}", Utc::now().format("%Y-%m-%d %H:%M:%S").to_string())
+        );
+
         match &mut self.hostworkflow {
             Some(host_work_flow) => {
                 host_work_flow.apply(&mut host_handler)?;
@@ -194,6 +210,10 @@ impl Job {
                 self.hostworkflow = Some(host_work_flow);
             }
         }
+
+        self.timestamp_end = Some(
+            format!("{}", Utc::now().format("%Y-%m-%d %H:%M:%S").to_string())
+        );
 
         Ok(())
     }

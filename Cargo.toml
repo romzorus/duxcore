@@ -20,3 +20,4 @@ tera = "1.20.0"
 colored = "2.1.0"
 termimad = "0.30.0"
 pem = { version = "3.0.4", features = ["serde"] }
+chrono = "0.4.38"
