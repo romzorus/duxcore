@@ -38,6 +38,7 @@ impl JobOutput {
                 TaskOutput::from_taskflow(&task_flow)
             );
         }
+        job_output.tasks = tasks_output;
         
         job_output
     }
