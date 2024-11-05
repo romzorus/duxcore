@@ -4,6 +4,8 @@ use crate::host::hostlist::HostList;
 use crate::workflow::hostworkflow::DuxContext;
 use crate::connection::host_connection::HostConnectionInfo;
 use crate::error::Error;
+use crate::task::tasklist::TaskListFileType;
+use crate::task::tasklist::TaskList;
 
 /// A JobList is just a Vec of Jobs on which convenient methods are defined. It simplifies the handling of multiple hosts.
 #[derive(Debug, Clone)]
@@ -40,6 +42,15 @@ impl JobList {
         }
     }
 
+    pub fn from_hostlist_as_str(raw_content: &str) -> Result<JobList, Error> {
+        match HostList::from_str(raw_content) {
+            Ok(host_list_content) => {
+                Ok(JobList::from_hostlist(host_list_content))
+            }
+            Err(error) => Err(error)
+        }
+    }
+
     pub fn add_job(&mut self, job: Job) {
         match &self.job_list {
             Some(_jobs) => {
@@ -61,7 +72,7 @@ impl JobList {
         serde_json::to_string_pretty(&joblist_output).unwrap()
     }
 
-    pub fn set_connection_for_all_jobs(
+    pub fn set_connection(
         &mut self,
         host_connection_info: HostConnectionInfo,
     ) -> Result<&mut Self, Error> {
@@ -80,7 +91,7 @@ impl JobList {
         }
     }
 
-    pub fn set_context_for_all_jobs(&mut self, context: DuxContext) -> &mut Self {
+    pub fn set_context(&mut self, context: DuxContext) -> &mut Self {
         if let Some(jobs) = &mut self.job_list {
             for job in jobs {
                 job.context = context.clone();
@@ -90,7 +101,7 @@ impl JobList {
         self
     }
 
-    pub fn set_var_for_all_jobs(&mut self, key: &str, value: &str) -> &mut Self {
+    pub fn set_var(&mut self, key: &str, value: &str) -> &mut Self {
         if let Some(jobs) = &mut self.job_list {
             for job in jobs {
                 job.context.set_var(key, value);
@@ -98,6 +109,38 @@ impl JobList {
         }
         
         self
+    }
+
+    pub fn set_tasklist_from_str(&mut self, raw_content: &str, content_type: TaskListFileType) -> Result<&mut Self, Error>{
+        if let Some(jobs) = &mut self.job_list {
+            match TaskList::from_str(raw_content, content_type) {
+                Ok(task_list) => {
+                    for job in jobs {
+                        job.tasklist = Some(task_list.clone());
+                    }
+                }
+                Err(error) => {
+                    return Err(error);
+                },
+            }
+        }
+        Ok(self)
+    }
+
+    pub fn set_tasklist_from_file(&mut self, file_path: &str, content_type: TaskListFileType) -> Result<&mut Self, Error>{
+        if let Some(jobs) = &mut self.job_list {
+            match TaskList::from_file(file_path, content_type) {
+                Ok(task_list) => {
+                    for job in jobs {
+                        job.tasklist = Some(task_list.clone());
+                    }
+                }
+                Err(error) => {
+                    return Err(error);
+                },
+            }
+        }
+        Ok(self)
     }
 
     pub fn dry_run(&mut self) -> Result<(), Error> {

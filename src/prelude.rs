@@ -9,6 +9,7 @@ pub use crate::host::hostlist::HostList;
 pub use crate::host::hosts::Host;
 pub use crate::host::parser::hostlist_parser;
 pub use crate::job::job::*;
+pub use crate::job::joblist::JobList;
 pub use crate::task::tasklist::RunningMode;
 pub use crate::task::tasklist::TaskList;
 pub use crate::task::tasklist::TaskListFileType;
