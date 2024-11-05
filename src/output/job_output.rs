@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::task::moduleblock::ModuleBlockExpectedState;
 use crate::workflow::hostworkflow::DuxContext;
 
-// This type is dedicated to being displayed as JSON output of a Job.
+/// This type is dedicated to being displayed as JSON output of a Job.
 #[derive(Serialize, Deserialize)]
 pub struct JobOutput {
     host: String,
