@@ -80,6 +80,26 @@ impl JobList {
         }
     }
 
+    pub fn set_context_for_all_jobs(&mut self, context: DuxContext) -> &mut Self {
+        if let Some(jobs) = &mut self.job_list {
+            for job in jobs {
+                job.context = context.clone();
+            }
+        }
+        
+        self
+    }
+
+    pub fn set_var_for_all_jobs(&mut self, key: &str, value: &str) -> &mut Self {
+        if let Some(jobs) = &mut self.job_list {
+            for job in jobs {
+                job.context.set_var(key, value);
+            }
+        }
+        
+        self
+    }
+
     pub fn dry_run(&mut self) -> Result<(), Error> {
         if let Some(jobs) = &mut self.job_list {
             for job in jobs {
