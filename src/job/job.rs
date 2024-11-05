@@ -1,5 +1,5 @@
 use crate::connection::host_connection::HostConnectionInfo;
-pub use crate::connection::hosthandler::HostHandler;
+use crate::connection::hosthandler::HostHandler;
 use crate::error::Error;
 use crate::output::job_output::JobOutput;
 use crate::task::tasklist::TaskList;
