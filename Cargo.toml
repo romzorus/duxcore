@@ -1,6 +1,6 @@
 [package]
 name = "duxcore"
-version = "0.1.7"
+version = "0.1.8"
 edition = "2021"
 authors = ["Romzorus <romzorus591@gmail.com>"]
 description = "Embed an automation engine right in your code and adapt it to your specific use cases"
@@ -19,6 +19,7 @@ ssh2 = "0.9.4"
 tera = "1.20.0"
 pem = { version = "3.0.4", features = ["serde"] }
 chrono = "0.4.38"
+rayon = "1.10.0"
 
 [profile.release]
 lto = true

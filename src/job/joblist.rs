@@ -1,3 +1,6 @@
+use rayon::iter::IntoParallelRefMutIterator;
+use rayon::iter::ParallelIterator;
+
 use crate::job::job::Job;
 use crate::output::joblist_output::JobListOutput;
 use crate::host::hostlist::HostList;
@@ -20,6 +23,7 @@ impl JobList {
         }
     }
 
+    /// Takes a HostList as input and creates a JobList withholding a new Job for each host of the list. Specific host/group variables are respected, meaning each Job can have its own unique context if defined that way in the HostList.
     pub fn from_hostlist(host_list: HostList) -> JobList {
         match host_list.hosts {
             Some(host_list_content) => {
@@ -51,6 +55,7 @@ impl JobList {
         }
     }
 
+    /// This method integrates to the JobList an "externally-defined" Job, meaning it can have a different connection method and so-on.
     pub fn add_job(&mut self, job: Job) {
         match &self.job_list {
             Some(_jobs) => {
@@ -62,16 +67,19 @@ impl JobList {
         }
     }
 
+    /// Displays the JobList as a JSON-serialized string
     pub fn display(&mut self) -> String {
         let joblist_output = JobListOutput::from_joblist(self);
         serde_json::to_string(&joblist_output).unwrap()
     }
 
+    /// Displays the JobList as a (pretty) JSON-serialized string
     pub fn display_pretty(&mut self) -> String {
         let joblist_output = JobListOutput::from_joblist(self);
         serde_json::to_string_pretty(&joblist_output).unwrap()
     }
 
+    /// Set the same connection information for all hosts of the JobList
     pub fn set_connection(
         &mut self,
         host_connection_info: HostConnectionInfo,
@@ -91,6 +99,7 @@ impl JobList {
         }
     }
 
+    /// Set the same context for all hosts of the JobList
     pub fn set_context(&mut self, context: DuxContext) -> &mut Self {
         if let Some(jobs) = &mut self.job_list {
             for job in jobs {
@@ -101,6 +110,7 @@ impl JobList {
         self
     }
 
+    /// Add the same variable for each host of the JobList
     pub fn set_var(&mut self, key: &str, value: &str) -> &mut Self {
         if let Some(jobs) = &mut self.job_list {
             for job in jobs {
@@ -111,6 +121,7 @@ impl JobList {
         self
     }
 
+    /// Set the given tasklist for all hosts of the JobList
     pub fn set_tasklist_from_str(&mut self, raw_content: &str, content_type: TaskListFileType) -> Result<&mut Self, Error>{
         if let Some(jobs) = &mut self.job_list {
             match TaskList::from_str(raw_content, content_type) {
@@ -127,6 +138,7 @@ impl JobList {
         Ok(self)
     }
 
+    /// Set the given tasklist for all hosts of the JobList
     pub fn set_tasklist_from_file(&mut self, file_path: &str, content_type: TaskListFileType) -> Result<&mut Self, Error>{
         if let Some(jobs) = &mut self.job_list {
             match TaskList::from_file(file_path, content_type) {
@@ -143,21 +155,23 @@ impl JobList {
         Ok(self)
     }
 
+    /// "DRY_RUN" the task list on each host of this JobList. This is done in parallel (based on the Rayon crate).
     pub fn dry_run(&mut self) -> Result<(), Error> {
         if let Some(jobs) = &mut self.job_list {
-            for job in jobs {
-                job.dry_run()?;
-            }
+            jobs.par_iter_mut().for_each(|job| 
+                job.dry_run().unwrap()
+            );
         }
         
         Ok(())
     }
 
+    /// "APPLY" the task list on each host of this JobList. This is done in parallel (based on the Rayon crate).
     pub fn apply(&mut self) -> Result<(), Error> {
         if let Some(jobs) = &mut self.job_list {
-            for job in jobs {
-                job.apply()?;
-            }
+            jobs.par_iter_mut().for_each(|job| 
+                job.apply().unwrap()
+            );
         }
         
         Ok(())

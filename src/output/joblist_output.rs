@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct JobListOutput {
-    jobs_output: Vec<JobOutput>
+    jobs: Vec<JobOutput>
 }
 
 impl JobListOutput {
@@ -20,7 +20,7 @@ impl JobListOutput {
         }
 
         JobListOutput {
-            jobs_output
+            jobs: jobs_output
         }
     }
 }

@@ -5,13 +5,12 @@
 </div>
 
 # The goal
-Instead of having one big automation tool (meaning configuration management or orchestration tool) trying to handle all scenarios (be scalable, performant, handle local and remote hosts through this protocol or this one, be compliant with this security standard and this one...), we prefer to build one flexible automation *engine* (this crate) and make it as easy as possible to embed in a codebase already adapted to one's specific need.
+Instead of having one big configuration management tool trying to handle all scenarios, we prefer to build one flexible automation *engine* (this crate) and make it as easy as possible to embed in a codebase, ready to be adapted to one's specific need.
 
 # Documentation
 A [*book*](https://www.dux-automate.org/book/) has been opened about the Dux project. Especially, modules list and documentation can be found [here](https://www.dux-automate.org/book/modules.html).
 
-# Most basic example : install a web server
-## Code
+# Basic example
 Import the crate
 
 ```shell
@@ -65,10 +64,7 @@ fn main() {
     println!("{}", my_job.display_pretty());
 }
 ```
-This is the basic workflow of Dux. The *Job* type, around which the whole automation revolves, is serializable/deserializable. It is then up to you to parallelize, distribute the work, display the results in some web interface or send the workload to workers via a message broker... Whatever suits you best !
-
-## Output
-
+Output
 ```json
 {
   "host": "10.20.0.203",
@@ -112,6 +108,7 @@ This is the basic workflow of Dux. The *Job* type, around which the whole automa
   ]
 }
 ```
+This is the basic workflow of Dux. The *Job* type, around which the whole automation revolves, is serializable/deserializable. It is then up to you to parallelize, distribute the work, display the results in some web interface or send the workload to workers via a message broker... Whatever suits you best !
 
 # More examples
 
@@ -136,7 +133,7 @@ Dux agent project : [dux-agent](https://gitlab.com/dux-tool/dux-agent)
 </div>
 
 ## Distributed implementation
-> Workload split between a controller which generates Assignments and workers which actually run them on targetted hosts
+> Workload split between a controller which generates Jobs and workers which actually run them on targetted hosts
 
 Dux distributed controller project : [dux-distributed-controller](https://gitlab.com/dux-tool/dux-distributed-controller)  
 Dux distributed worker project : [dux-distributed-worker](https://gitlab.com/dux-tool/dux-distributed-worker)
