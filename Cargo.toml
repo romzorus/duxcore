@@ -19,6 +19,7 @@ ssh2 = "0.9.4"
 tera = "1.20.0"
 pem = { version = "3.0.4", features = ["serde"] }
 chrono = "0.4.38"
+rayon = "1.10.0"
 
 [profile.release]
 lto = true

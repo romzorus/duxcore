@@ -1,3 +1,6 @@
+use rayon::iter::IntoParallelRefMutIterator;
+use rayon::iter::ParallelIterator;
+
 use crate::job::job::Job;
 use crate::output::joblist_output::JobListOutput;
 use crate::host::hostlist::HostList;
@@ -155,9 +158,9 @@ impl JobList {
 
     pub fn apply(&mut self) -> Result<(), Error> {
         if let Some(jobs) = &mut self.job_list {
-            for job in jobs {
-                job.apply()?;
-            }
+            jobs.par_iter_mut().for_each(|job| 
+                job.apply().unwrap()
+            );
         }
         
         Ok(())
