@@ -152,8 +152,8 @@ impl StepFlow {
                     }
 
                     if register {
-                        dux_context.vars.insert(format!("{}.rc", register_under_variable), format!("{}", apicallresult.rc.unwrap()));
-                        dux_context.vars.insert(format!("{}.output", register_under_variable), format!("{}", apicallresult.output.clone().unwrap()));
+                        dux_context.vars.insert(format!("{}.rc", register_under_variable), format!("{}", apicallresult.rc.unwrap_or_else(|| 0)));
+                        dux_context.vars.insert(format!("{}.output", register_under_variable), format!("{}", apicallresult.output.clone().unwrap_or_else(|| String::new())));
                         dux_context.vars.insert(format!("{}.status", register_under_variable), format!("{:?}", apicallresult.status));
                     }
 

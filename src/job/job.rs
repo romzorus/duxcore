@@ -151,8 +151,8 @@ impl Job {
         self
     }
 
-    pub fn set_vars(&mut self, vars: &Option<HashMap<String, String>>) -> &mut Self {
-        self.vars = vars.clone();
+    pub fn set_vars(&mut self, new_vars: &Option<HashMap<String, String>>) -> &mut Self {
+        self.vars = new_vars.clone();
         self
     }
 

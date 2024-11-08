@@ -31,8 +31,6 @@ impl JobList {
 
                 for host in host_list_content {
                     let job = Job::from_host(host);
-                    println!("Host: {:?}", host);
-                    println!("Job: {:?}", job);
                     jobs.push(job);
 
                 }
