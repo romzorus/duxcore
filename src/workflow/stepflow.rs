@@ -134,6 +134,7 @@ impl StepFlow {
                 let mut register_under_variable = String::new();
 
                 if let Some(variable_name) = &self.step_expected.register {
+                    dux_context.tera_context.insert(variable_name, &result.apicallresults);
                     register = true;
                     register_under_variable = variable_name.to_string();
                 }
@@ -157,11 +158,6 @@ impl StepFlow {
                         dux_context.vars.insert(format!("{}.status", register_under_variable), format!("{:?}", apicallresult.status));
                     }
 
-                }
-
-                // Register : push step result to context under the specified variable name
-                if register {
-                    dux_context.tera_context.insert(register_under_variable, &result.apicallresults);
                 }
 
                 self.step_status = step_status;
