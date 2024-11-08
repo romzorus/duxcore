@@ -106,6 +106,8 @@ impl StepFlow {
             dux_context.tera_context.insert(format!("{}.status", variable_name), &String::new());
         }
 
+        println!("[DEBUG] {:#?}", dux_context);
+
         // Dry run -> Changes
         match self
             .step_expected
