@@ -100,11 +100,11 @@ impl StepFlow {
             }
         };
 
-        if let Some(variable_name) = &self.step_expected.register {
-            dux_context.tera_context.insert(format!("{}.rc", variable_name), &0i32);
-            dux_context.tera_context.insert(format!("{}.output", variable_name), &String::new());
-            dux_context.tera_context.insert(format!("{}.status", variable_name), &String::new());
-        }
+        // if let Some(variable_name) = &self.step_expected.register {
+        //     dux_context.tera_context.insert(format!("{}.rc", variable_name), &0i32);
+        //     dux_context.tera_context.insert(format!("{}.output", variable_name), &String::new());
+        //     dux_context.tera_context.insert(format!("{}.status", variable_name), &String::new());
+        // }
 
         println!("[DEBUG] {:#?}", dux_context);
 
@@ -142,7 +142,7 @@ impl StepFlow {
                 let mut register_under_variable = String::new();
 
                 if let Some(variable_name) = &self.step_expected.register {
-                    // dux_context.tera_context.insert(variable_name, &result.apicallresults);
+                    dux_context.tera_context.insert(variable_name, &result.apicallresults);
                     register = true;
                     register_under_variable = variable_name.to_string();
                 }
