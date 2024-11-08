@@ -48,6 +48,13 @@ impl Job {
         }
     }
 
+    pub fn from_host(host: Host) -> Job {
+        let mut job = Job::new();
+        job.set_address(&host.address);
+        job.set_vars(&host.vars);
+        job
+    }
+
     pub fn get_address(&self) -> String {
         self.host.address.clone()
     }
@@ -144,6 +151,11 @@ impl Job {
         self
     }
 
+    pub fn set_vars(&mut self, vars: &Option<HashMap<String, String>>) -> &mut Self {
+        self.vars = vars.clone();
+        self
+    }
+
     /// "DRY_RUN" this job -> evaluate the difference between the expected state and the actual state of the given host
     pub fn dry_run(&mut self) -> Result<(), Error> {
         // Build a HostHandler
@@ -202,7 +214,7 @@ impl Job {
 
         self.timestamp_end = Some(format!("{}", Utc::now().format("%+").to_string()));
         self.vars = Some(dux_context.vars);
-        
+
         Ok(())
     }
 
