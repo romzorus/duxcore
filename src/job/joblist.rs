@@ -30,7 +30,10 @@ impl JobList {
                 let mut jobs: Vec<Job> = Vec::new();
 
                 for host in host_list_content {
-                    jobs.push(Job::from_host(host));
+                    let job = Job::from_host(host);
+                    println!("Host: {:?}", host);
+                    println!("Job: {:?}", job);
+                    jobs.push(job);
 
                 }
 
