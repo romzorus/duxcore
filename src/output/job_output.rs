@@ -73,6 +73,8 @@ pub struct StepOutput {
     expected_state: ModuleBlockExpectedState,
     status: String,
     #[serde(skip_serializing_if = "Option::is_none")]
+    register: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     raw_output: Option<String>,
 }
 
@@ -94,6 +96,7 @@ impl StepOutput {
             name: step_flow.step_expected.name.as_ref().unwrap().to_string(),
             expected_state: step_flow.step_expected.moduleblock.clone().consider_vars(vars).unwrap(),
             status: format!("{:?}", step_flow.step_status),
+            register: step_flow.step_expected.register.clone(),
             raw_output,
         }
     }
