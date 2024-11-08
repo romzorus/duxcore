@@ -163,7 +163,8 @@ impl Job {
         host_handler.init();
 
         // Build a DuxContext
-        let mut dux_context = DuxContext::from(self.host.clone());
+        let mut dux_context = DuxContext::from_job(&self);
+        
 
         self.timestamp_start = Some(format!("{}", Utc::now().format("%+").to_string()));
 
@@ -194,7 +195,7 @@ impl Job {
         host_handler.init();
 
         // Build a DuxContext
-        let mut dux_context = DuxContext::from(self.host.clone());
+        let mut dux_context = DuxContext::from_job(&self);
 
         self.timestamp_start = Some(format!("{}", Utc::now().format("%+").to_string()));
 

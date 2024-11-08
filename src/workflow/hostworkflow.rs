@@ -6,6 +6,7 @@ use crate::workflow::taskflow::{TaskFlow, TaskStatus};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use tera::Context;
+use crate::job::job::Job;
 
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -143,5 +144,15 @@ impl DuxContext {
 
     pub fn set_var(&mut self, key: &str, value: &str) {
         self.tera_context.insert(key, value);
+    }
+
+    pub fn from_job(job: &Job) -> DuxContext {
+        match &job.vars {
+            Some(var_list) => DuxContext {
+                vars: var_list.clone(),
+                tera_context: Context::from_serialize(var_list).unwrap(),
+            },
+            None => DuxContext::new(),
+        }
     }
 }
