@@ -6,8 +6,9 @@ use crate::step::stepchange::StepChange;
 use crate::step::stepresult::StepResult;
 use crate::task::step::Step;
 use crate::workflow::hostworkflow::DuxContext;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct StepFlow {
     pub step_expected: Step,
     pub allowed_to_fail: bool,
@@ -129,6 +130,14 @@ impl StepFlow {
                 let result = change.apply_moduleblockchange(hosthandler);
                 let mut step_status = StepStatus::ApplySuccessful;
 
+                let mut register = false;
+                let mut register_under_variable = String::new();
+
+                if let Some(variable_name) = &self.step_expected.register {
+                    register = true;
+                    register_under_variable = variable_name.to_string();
+                }
+
                 for apicallresult in result.apicallresults.clone().iter() {
                     match apicallresult.status {
                         ApiCallStatus::Failure(_) => {
@@ -141,11 +150,18 @@ impl StepFlow {
                         }
                         _ => {}
                     }
+
+                    if register {
+                        dux_context.vars.insert(format!("{}.rc", register_under_variable), format!("{}", apicallresult.rc.unwrap()));
+                        dux_context.vars.insert(format!("{}.output", register_under_variable), format!("{}", apicallresult.output.clone().unwrap()));
+                        dux_context.vars.insert(format!("{}.status", register_under_variable), format!("{:?}", apicallresult.status));
+                    }
+
                 }
 
                 // Register : push step result to context under the specified variable name
-                if let Some(variable_name) = &self.step_expected.register {
-                    dux_context.tera_context.insert(variable_name, &result.apicallresults);
+                if register {
+                    dux_context.tera_context.insert(register_under_variable, &result.apicallresults);
                 }
 
                 self.step_status = step_status;
@@ -162,7 +178,7 @@ impl StepFlow {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub enum StepStatus {
     NotRunYet,
     AlreadyMatched,

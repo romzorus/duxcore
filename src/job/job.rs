@@ -1,11 +1,13 @@
 use crate::connection::host_connection::HostConnectionInfo;
 use crate::connection::hosthandler::HostHandler;
+use std::collections::HashMap;
 use crate::error::Error;
 use crate::output::job_output::JobOutput;
 use crate::task::tasklist::TaskList;
 use crate::task::tasklist::TaskListFileType;
 use crate::workflow::hostworkflow::HostWorkFlowStatus;
 use crate::workflow::hostworkflow::{DuxContext, HostWorkFlow};
+use crate::host::hosts::Host;
 use chrono::Utc;
 use machineid_rs::{Encryption, HWIDComponent, IdBuilder};
 use serde::{Deserialize, Serialize};
@@ -14,13 +16,15 @@ use std::time::SystemTime;
 
 
 /// The Job is the key type around which the whole automation revolves. A Job is about one host only. If you want to handle multiple hosts, you will need to have multiple Jobs (in a vec or anything else).
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Job {
-    pub address: HostAddress,
+    pub host: Host,
+    // pub address: HostAddress,
     pub host_connection_info: HostConnectionInfo,
     pub correlation_id: Option<String>,
     pub tasklist: Option<TaskList>,
-    pub context: DuxContext,
+    // pub context: DuxContext,
+    pub vars: Option<HashMap<String, String>>,
     pub timestamp_start: Option<String>,
     pub timestamp_end: Option<String>,
     pub hostworkflow: Option<HostWorkFlow>,
@@ -30,11 +34,13 @@ pub struct Job {
 impl Job {
     pub fn new() -> Job {
         Job {
-            address: HostAddress::Unset,
+            host: Host::new(),
+            // address: HostAddress::Unset,
             host_connection_info: HostConnectionInfo::Unset,
             correlation_id: None,
             tasklist: None,
-            context: DuxContext::new(),
+            // context: DuxContext::new(),
+            vars: None,
             timestamp_start: None,
             timestamp_end: None,
             hostworkflow: None,
@@ -42,34 +48,16 @@ impl Job {
         }
     }
 
-    pub fn get_address(&self) -> Result<String, Error> {
-        match &self.address {
-            HostAddress::LocalHost => Ok("localhost".to_string()),
-            HostAddress::RemoteHost(address) => Ok(address.to_string()),
-            HostAddress::Unset => Err(Error::MissingInitialization(format!("Unset address"))),
-        }
+    pub fn get_address(&self) -> String {
+        self.host.address.clone()
     }
 
     /// Set host address
-    pub fn set_address(&mut self, address: &str) -> Result<&mut Self, Error> {
+    pub fn set_address(&mut self, address: &str) -> &mut Self {
         // TODO : Add controls on address content (invalid address with spaces or else...)
-        match address.to_lowercase().as_str() {
-            "localhost" => {
-                self.address = HostAddress::LocalHost;
-                Ok(self)
-            }
-            "127.0.0.1" => {
-                self.address = HostAddress::LocalHost;
-                Ok(self)
-            }
-            "" => {
-                return Err(Error::WrongInitialization(format!("Empty address")));
-            }
-            _ => {
-                self.address = HostAddress::RemoteHost(address.to_string());
-                Ok(self)
-            }
-        }
+        self.host.address = address.to_string();
+
+        self
     }
 
     /// Using a correlation id can be required in a distributed environment. If a machine is building Jobs and sending it to worker nodes, then the results will probably arrive in a random order, meaning it will hard to identify which results belong to which Job unless we use correlation ids.
@@ -142,50 +130,47 @@ impl Job {
         }
     }
 
-    pub fn set_context(&mut self, context: DuxContext) -> &mut Self {
-        self.context = context;
-        self
-    }
-
     pub fn set_var(&mut self, key: &str, value: &str) -> &mut Self {
-        self.context.set_var(key, value);
+        match &mut self.vars {
+            Some(var_list) => {
+                var_list.insert(key.to_string(), value.to_string());
+            }
+            None => {
+                let mut var_list = HashMap::new();
+                var_list.insert(key.to_string(), value.to_string());
+
+            }
+        }
         self
     }
 
     /// "DRY_RUN" this job -> evaluate the difference between the expected state and the actual state of the given host
     pub fn dry_run(&mut self) -> Result<(), Error> {
         // Build a HostHandler
-        let mut host_handler = match &self.address {
-            HostAddress::Unset => {
-                return Err(Error::MissingInitialization("address not set".into()));
-            }
-            HostAddress::LocalHost => {
-                HostHandler::from("localhost".into(), self.host_connection_info.clone()).unwrap()
-            }
-            HostAddress::RemoteHost(host_address) => {
-                HostHandler::from(host_address.into(), self.host_connection_info.clone()).unwrap()
-            }
-        };
-
+        let mut host_handler = HostHandler::from(self.host.address.clone(), self.host_connection_info.clone()).unwrap();
         host_handler.init();
+
+        // Build a DuxContext
+        let mut dux_context = DuxContext::from(self.host.clone());
 
         self.timestamp_start = Some(format!("{}", Utc::now().format("%+").to_string()));
 
         match &mut self.hostworkflow {
             Some(host_work_flow) => {
-                host_work_flow.dry_run(&mut host_handler, &mut self.context)?;
+                host_work_flow.dry_run(&mut host_handler, &mut dux_context)?;
                 self.final_status = host_work_flow.final_status.clone();
             }
             None => {
                 let mut host_work_flow =
                     HostWorkFlow::from(&self.tasklist.as_mut().unwrap());
-                host_work_flow.dry_run(&mut host_handler, &mut self.context)?;
+                host_work_flow.dry_run(&mut host_handler, &mut dux_context)?;
                 self.final_status = host_work_flow.final_status.clone();
                 self.hostworkflow = Some(host_work_flow);
             }
         }
 
         self.timestamp_end = Some(format!("{}", Utc::now().format("%+").to_string()));
+        self.vars = Some(dux_context.vars);
 
         Ok(())
     }
@@ -193,38 +178,31 @@ impl Job {
     /// "APPLY" this job -> evaluate what needs to be done to reach the expected state, then do it
     pub fn apply(&mut self) -> Result<(), Error> {
         // Build a HostHandler
-        let mut host_handler = match &self.address {
-            HostAddress::Unset => {
-                return Err(Error::MissingInitialization("address not set".into()));
-            }
-            HostAddress::LocalHost => {
-                HostHandler::from("localhost".into(), self.host_connection_info.clone()).unwrap()
-            }
-            HostAddress::RemoteHost(host_address) => {
-                HostHandler::from(host_address.into(), self.host_connection_info.clone()).unwrap()
-            }
-        };
-
+        let mut host_handler = HostHandler::from(self.host.address.clone(), self.host_connection_info.clone()).unwrap();
         host_handler.init();
+
+        // Build a DuxContext
+        let mut dux_context = DuxContext::from(self.host.clone());
 
         self.timestamp_start = Some(format!("{}", Utc::now().format("%+").to_string()));
 
         match &mut self.hostworkflow {
             Some(host_work_flow) => {
-                host_work_flow.apply(&mut host_handler, &mut self.context)?;
+                host_work_flow.apply(&mut host_handler, &mut dux_context)?;
                 self.final_status = host_work_flow.final_status.clone();
             }
             None => {
                 let mut host_work_flow =
                     HostWorkFlow::from(&self.tasklist.as_mut().unwrap());
-                host_work_flow.apply(&mut host_handler, &mut self.context)?;
+                host_work_flow.apply(&mut host_handler, &mut dux_context)?;
                 self.final_status = host_work_flow.final_status.clone();
                 self.hostworkflow = Some(host_work_flow);
             }
         }
 
         self.timestamp_end = Some(format!("{}", Utc::now().format("%+").to_string()));
-
+        self.vars = Some(dux_context.vars);
+        
         Ok(())
     }
 
@@ -257,7 +235,7 @@ pub enum JobFinalStatus {
     GenericFailed(String),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub enum HostAddress {
     Unset,
     LocalHost,

@@ -3,12 +3,13 @@ use crate::error::Error;
 use crate::task::taskblock::TaskBlock;
 use crate::workflow::hostworkflow::DuxContext;
 use crate::workflow::stepflow::{StepFlow, StepStatus};
+use serde::{Deserialize, Serialize};
 
 /// A TaskFlow withholds all step flows, a flow being being the combination of :
 /// - an expected state
 /// - changes required to have the host match this expected state
 /// - results of actually trying to enforce these changes
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct TaskFlow {
     pub name: Option<String>,
     pub with_sudo: Option<bool>,
@@ -97,7 +98,7 @@ impl TaskFlow {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub enum TaskStatus {
     NotRunYet,
     AlreadyMatched,

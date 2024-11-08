@@ -3,8 +3,9 @@ use crate::connection::connectionmode::ssh2mode::Ssh2AuthMode;
 use crate::connection::specification::Credentials;
 use pem::Pem;
 use std::path::PathBuf;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub enum HostConnectionInfo {
     Unset,
     LocalHost(WhichUser),

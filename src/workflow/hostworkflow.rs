@@ -7,7 +7,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use tera::Context;
 
-#[derive(Debug, Clone)]
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct HostWorkFlow {
     pub task_flows: Vec<TaskFlow>,
     pub final_status: HostWorkFlowStatus,
@@ -116,7 +117,7 @@ pub enum HostWorkFlowStatus {
 }
 
 /// Withholds variables, either defined in advance by the user in HostList and/or Tasklist or defined at runtime (output of a Step saved as a variable). This struct is accessible by each step during the tasklist traversal.
-#[derive(Clone, Debug)]
+#[derive(Debug, Clone)]
 pub struct DuxContext {
     pub vars: HashMap<String, String>,
     pub tera_context: Context,

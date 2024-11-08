@@ -31,8 +31,7 @@ impl JobList {
 
                 for host in host_list_content {
                     let mut job = Job::new();
-                    job.set_address(&host.address).unwrap();
-                    job.set_context(DuxContext::from(host));
+                    job.set_address(&host.address);
 
                     jobs.push(job);
 
@@ -99,22 +98,11 @@ impl JobList {
         }
     }
 
-    /// Set the same context for all hosts of the JobList
-    pub fn set_context(&mut self, context: DuxContext) -> &mut Self {
-        if let Some(jobs) = &mut self.job_list {
-            for job in jobs {
-                job.context = context.clone();
-            }
-        }
-        
-        self
-    }
-
     /// Add the same variable for each host of the JobList
     pub fn set_var(&mut self, key: &str, value: &str) -> &mut Self {
         if let Some(jobs) = &mut self.job_list {
             for job in jobs {
-                job.context.set_var(key, value);
+                job.set_var(key, value);
             }
         }
         
