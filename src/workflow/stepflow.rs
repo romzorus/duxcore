@@ -130,12 +130,16 @@ impl StepFlow {
                 let result = change.apply_moduleblockchange(hosthandler);
                 let mut step_status = StepStatus::ApplySuccessful;
 
-                let mut register = false;
-                let mut register_under_variable = String::new();
-
                 if let Some(variable_name) = &self.step_expected.register {
-                    register = true;
-                    register_under_variable = variable_name.to_string();
+                    dux_context.tera_context.insert(variable_name, &result);
+                    dux_context.save_var(
+                        format!("{}.rc", variable_name),
+                        format!("{}", &result.rc.unwrap())
+                    );
+                    dux_context.save_var(
+                        format!("{}.output", variable_name),
+                        result.output.clone().unwrap()
+                    );
                 }
 
                 for apicallresult in result.apicallresults.clone().iter() {
@@ -151,17 +155,6 @@ impl StepFlow {
                         _ => {}
                     }
 
-                    if register {
-                        dux_context.vars.insert(format!("{}.rc", register_under_variable), format!("{}", apicallresult.rc.unwrap()));
-                        dux_context.vars.insert(format!("{}.output", register_under_variable), format!("{}", apicallresult.output.clone().unwrap()));
-                        dux_context.vars.insert(format!("{}.status", register_under_variable), format!("{:?}", apicallresult.status));
-                    }
-
-                }
-
-                // Register : push step result to context under the specified variable name
-                if register {
-                    dux_context.tera_context.insert(register_under_variable, &result.apicallresults);
                 }
 
                 self.step_status = step_status;

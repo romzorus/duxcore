@@ -144,4 +144,8 @@ impl DuxContext {
     pub fn set_var(&mut self, key: &str, value: &str) {
         self.tera_context.insert(key, value);
     }
+
+    pub fn save_var(&mut self, key: String, value: String) {
+        self.vars.insert(key, value);
+    }
 }
