@@ -131,11 +131,11 @@ impl DuxContext {
         }
     }
 
-    pub fn from(host: Host) -> DuxContext {
-        match host.vars {
-            Some(vars) => DuxContext {
-                vars: vars.clone(),
-                tera_context: Context::from_serialize(vars).unwrap(),
+    pub fn from_vars(vars: Option<HashMap<String, String>>) -> DuxContext {
+        match vars {
+            Some(vars_list) => DuxContext {
+                vars: vars_list.clone(),
+                tera_context: Context::from_serialize(vars_list).unwrap(),
             },
             None => DuxContext::new(),
         }
