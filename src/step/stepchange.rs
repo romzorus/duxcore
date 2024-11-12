@@ -71,7 +71,7 @@ impl StepChange {
                     };
                     results.push(apicallresult);
                 }
-                StepResult::from(results)
+                StepResult::from(&results)
             }
         };
 
