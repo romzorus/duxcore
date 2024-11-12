@@ -75,12 +75,11 @@ impl StepChange {
             }
         };
 
-        let mut step_result = StepResult::new();
-
+        let mut new_api_call_results_list: Vec<ApiCallResult> = Vec::new();
         // As JSON doesn't allow control characters in String fields, they need to be removed/replaced by spaces.
         // Otherwise, Tera can't display these fields.
         for result in raw_step_result.apicallresults.iter() {
-            step_result.apicallresults.push(ApiCallResult {
+            new_api_call_results_list.push(ApiCallResult {
                 rc: result.rc,
                 output: match &result.output {
                     Some(content) => Some(
@@ -95,6 +94,6 @@ impl StepChange {
             })
         }
 
-        return step_result;
+        StepResult::from(&new_api_call_results_list)
     }
 }
