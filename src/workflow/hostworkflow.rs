@@ -36,11 +36,11 @@ impl HostWorkFlow {
         }
     }
 
-    pub fn dry_run(&mut self, hosthandler: &mut HostHandler, dux_context: &mut DuxContext) -> Result<(), Error> {
+    pub fn dry_run(&mut self, hosthandler: &mut HostHandler, tera_context: &mut tera::Context) -> Result<(), Error> {
         let mut changes_required = false;
 
         for task_flow in self.task_flows.iter_mut() {
-            match task_flow.dry_run(hosthandler, dux_context) {
+            match task_flow.dry_run(hosthandler, tera_context) {
                 Ok(()) => {
                     if let TaskStatus::ChangeRequired = task_flow.task_status {
                         changes_required = true;
@@ -61,7 +61,7 @@ impl HostWorkFlow {
         Ok(())
     }
     // pub fn apply(&mut self, hosthandler: &mut HostHandler) -> Result<(), Error> {
-    pub fn apply(&mut self, hosthandler: &mut HostHandler, dux_context: &mut DuxContext) -> Result<(), Error> {
+    pub fn apply(&mut self, hosthandler: &mut HostHandler, tera_context: &mut tera::Context) -> Result<(), Error> {
         if let HostWorkFlowStatus::AlreadyMatched = self.final_status {
             // Nothing to do, dry_run was performed before and concluded that nothing is to be
         } else {
@@ -70,7 +70,7 @@ impl HostWorkFlow {
             let mut failures = false;
 
             for task_flow in self.task_flows.iter_mut() {
-                match task_flow.apply(hosthandler, dux_context) {
+                match task_flow.apply(hosthandler, tera_context) {
                     Ok(()) => match task_flow.task_status {
                         TaskStatus::ApplySuccesful => {
                             already_matched = false;
@@ -116,32 +116,32 @@ pub enum HostWorkFlowStatus {
     ApplyFailed,
 }
 
-/// Withholds variables, either defined in advance by the user in HostList and/or Tasklist or defined at runtime (output of a Step saved as a variable). This struct is accessible by each step during the tasklist traversal.
-#[derive(Debug, Clone)]
-pub struct DuxContext {
-    pub vars: HashMap<String, String>,
-    pub tera_context: Context,
-}
+// Withholds variables, either defined in advance by the user in HostList and/or Tasklist or defined at runtime (output of a Step saved as a variable). This struct is accessible by each step during the tasklist traversal.
+// #[derive(Debug, Clone)]
+// pub struct DuxContext {
+//     pub vars: HashMap<String, String>,
+//     pub tera_context: Context,
+// }
 
-impl DuxContext {
-    pub fn new() -> DuxContext {
-        DuxContext {
-            vars: HashMap::new(),
-            tera_context: Context::new(),
-        }
-    }
+// impl DuxContext {
+//     pub fn new() -> DuxContext {
+//         DuxContext {
+//             vars: HashMap::new(),
+//             tera_context: Context::new(),
+//         }
+//     }
 
-    pub fn from_vars(vars: Option<HashMap<String, String>>) -> DuxContext {
-        match vars {
-            Some(vars_list) => DuxContext {
-                vars: vars_list.clone(),
-                tera_context: Context::from_serialize(vars_list).unwrap(),
-            },
-            None => DuxContext::new(),
-        }
-    }
+//     pub fn from_vars(vars: Option<HashMap<String, String>>) -> DuxContext {
+//         match vars {
+//             Some(vars_list) => DuxContext {
+//                 vars: vars_list.clone(),
+//                 tera_context: Context::from_serialize(vars_list).unwrap(),
+//             },
+//             None => DuxContext::new(),
+//         }
+//     }
 
-    pub fn set_var(&mut self, key: &str, value: &str) {
-        self.tera_context.insert(key, value);
-    }
-}
+//     pub fn set_var(&mut self, key: &str, value: &str) {
+//         self.tera_context.insert(key, value);
+//     }
+// }

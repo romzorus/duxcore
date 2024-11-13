@@ -4,7 +4,6 @@ use rayon::iter::ParallelIterator;
 use crate::job::job::Job;
 use crate::output::joblist_output::JobListOutput;
 use crate::host::hostlist::HostList;
-use crate::workflow::hostworkflow::DuxContext;
 use crate::connection::host_connection::HostConnectionInfo;
 use crate::error::Error;
 use crate::task::tasklist::TaskListFileType;
@@ -99,7 +98,7 @@ impl JobList {
     pub fn set_var(&mut self, key: &str, value: &str) -> &mut Self {
         if let Some(jobs) = &mut self.job_list {
             for job in jobs {
-                job.set_var(key, value);
+                job.add_var(key, value);
             }
         }
         

@@ -4,7 +4,6 @@ use crate::error::Error;
 use crate::modules::prelude::*;
 use crate::result::apicallresult::ApiCallResult;
 use crate::step::stepchange::StepChange;
-use crate::workflow::hostworkflow::DuxContext;
 use serde::{Deserialize, Serialize};
 use tera::{Context, Tera};
 use std::collections::HashMap;
@@ -31,13 +30,13 @@ impl ModuleBlockExpectedState {
 
     pub fn consider_context(
         &mut self,
-        dux_context: &mut DuxContext,
+        tera_context: &mut tera::Context,
     ) -> Result<ModuleBlockExpectedState, Error> {
         // TODO : is this the best way to do this ?
         let serialized_self = serde_json::to_string(self).unwrap();
-        // let context_wise_serialized_self = dux_context.tera_interface.render_str(&serialized_self, &dux_context.tera_context).unwrap();
+
         let context_wise_serialized_self =
-            Tera::one_off(serialized_self.as_str(), &dux_context.tera_context, true).unwrap();
+            Tera::one_off(serialized_self.as_str(), tera_context, true).unwrap();
         match serde_json::from_str::<ModuleBlockExpectedState>(&context_wise_serialized_self) {
             Ok(context_wise_moduleblock) => Ok(context_wise_moduleblock),
             Err(error) => Err(Error::FailureToParseContent(format!("{}", error))),
@@ -46,14 +45,14 @@ impl ModuleBlockExpectedState {
 
     pub fn consider_vars(
         &mut self,
-        vars: &Option<HashMap<String, String>>,
+        vars: &Option<serde_json::Value>,
     ) -> Result<ModuleBlockExpectedState, Error> {
         // TODO : is this the best way to do this ?
         let serialized_self = serde_json::to_string(self).unwrap();
 
         let temp_tera_context = match vars {
             Some(var_list) => {
-                Context::from_serialize(var_list).unwrap()
+                Context::from_value(var_list.clone()).unwrap()
             }
             None => {
                 Context::new()

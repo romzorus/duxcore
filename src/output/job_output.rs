@@ -6,7 +6,6 @@ use crate::workflow::stepflow::StepStatus;
 use crate::workflow::taskflow::TaskFlow;
 use serde::{Deserialize, Serialize};
 use crate::task::moduleblock::ModuleBlockExpectedState;
-use crate::workflow::hostworkflow::DuxContext;
 
 /// This type is dedicated to being displayed as JSON output of a Job.
 #[derive(Serialize, Deserialize)]
@@ -54,7 +53,7 @@ pub struct TaskOutput {
 }
 
 impl TaskOutput {
-    pub fn from_taskflow(task_flow: &TaskFlow, vars: &Option<HashMap<String, String>>) -> TaskOutput {
+    pub fn from_taskflow(task_flow: &TaskFlow, vars: &Option<serde_json::Value>) -> TaskOutput {
         let mut steps_output: Vec<StepOutput> = Vec::new();
         for step_flow in task_flow.step_flows.clone() {
             steps_output.push(StepOutput::from_stepflow(&step_flow, vars));
@@ -77,7 +76,7 @@ pub struct StepOutput {
 }
 
 impl StepOutput {
-    pub fn from_stepflow(step_flow: &StepFlow, vars: &Option<HashMap<String, String>>) -> StepOutput {
+    pub fn from_stepflow(step_flow: &StepFlow, vars: &Option<serde_json::Value>) -> StepOutput {
         let raw_output = match step_flow.step_status {
             StepStatus::ApplyFailed => {
                 let mut api_call_results_output = String::new();
