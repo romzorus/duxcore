@@ -35,7 +35,7 @@ impl ApiCallResult {
                     //     .collect()
                     raw_output_content
                         .chars()
-                        .filter(|c| c.is_ascii() && ! c.is_control())
+                        .filter(|c| ! c.is_ascii_control() && ! c.is_control())
                         .collect()
                 )
             }
