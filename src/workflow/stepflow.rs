@@ -136,13 +136,13 @@ impl StepFlow {
                     match result.rc {
                         Some(rc) => {
                             dux_context.save_var(
-                                format!("{}.rc", variable_name),
+                                format!("{}_rc", variable_name),
                                 format!("{}", &rc)
                             );
                         }
                         None => {
                             dux_context.save_var(
-                                format!("{}.rc", variable_name),
+                                format!("{}_rc", variable_name),
                                 "None".into()
                             );
                         }
@@ -151,13 +151,13 @@ impl StepFlow {
                     match &result.output {
                         Some(output) => {
                             dux_context.save_var(
-                                format!("{}.output", variable_name),
+                                format!("{}_output", variable_name),
                                 output.to_string()
                             );
                         }
                         None => {
                             dux_context.save_var(
-                                format!("{}.output", variable_name),
+                                format!("{}_output", variable_name),
                                 "None".into()
                             );
                         }
