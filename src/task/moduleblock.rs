@@ -36,8 +36,13 @@ impl ModuleBlockExpectedState {
         // TODO : is this the best way to do this ?
         let serialized_self = serde_json::to_string(self).unwrap();
         // let context_wise_serialized_self = dux_context.tera_interface.render_str(&serialized_self, &dux_context.tera_context).unwrap();
+        let mut temp_tera_context = dux_context.tera_context.clone();
+        for (key, value) in dux_context.vars.clone() {
+            temp_tera_context.insert(key, &value);
+        }
+
         let context_wise_serialized_self =
-            Tera::one_off(serialized_self.as_str(), &dux_context.tera_context, true).unwrap();
+            Tera::one_off(serialized_self.as_str(), &temp_tera_context, true).unwrap();
         match serde_json::from_str::<ModuleBlockExpectedState>(&context_wise_serialized_self) {
             Ok(context_wise_moduleblock) => Ok(context_wise_moduleblock),
             Err(error) => Err(Error::FailureToParseContent(format!("{}", error))),
