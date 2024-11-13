@@ -132,14 +132,19 @@ impl StepFlow {
 
                 if let Some(variable_name) = &self.step_expected.register {
                     dux_context.tera_context.insert(variable_name, &result);
-                    dux_context.save_var(
-                        format!("{}.rc", variable_name),
-                        format!("{}", &result.rc.unwrap())
-                    );
-                    dux_context.save_var(
-                        format!("{}.output", variable_name),
-                        result.output.clone().unwrap()
-                    );
+
+                    if let Some(rc) = result.rc {
+                        dux_context.save_var(
+                            format!("{}.rc", variable_name),
+                            format!("{}", &rc)
+                        );
+                    }
+                    if let Some(output) = &result.output {
+                        dux_context.save_var(
+                            format!("{}.output", variable_name),
+                            output.to_string()
+                        );
+                    }
                 }
 
                 for apicallresult in result.apicallresults.clone().iter() {
