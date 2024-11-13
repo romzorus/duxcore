@@ -47,7 +47,7 @@ impl StepChange {
     }
 
     pub fn apply_moduleblockchange(&self, hosthandler: &mut HostHandler) -> StepResult {
-        let raw_step_result = match self {
+        let mut step_result = match self {
             StepChange::AlreadyMatched(_message) => return StepResult::none(),
             StepChange::ModuleApiCalls(changeslist) => {
                 let mut results: Vec<ApiCallResult> = Vec::new();
@@ -75,25 +75,20 @@ impl StepChange {
             }
         };
 
-        let mut new_api_call_results_list: Vec<ApiCallResult> = Vec::new();
+        // let mut new_api_call_results_list: Vec<ApiCallResult> = Vec::new();
         // As JSON doesn't allow control characters in String fields, they need to be removed/replaced by spaces.
         // Otherwise, Tera can't display these fields.
-        for result in raw_step_result.apicallresults.iter() {
-            new_api_call_results_list.push(ApiCallResult {
-                rc: result.rc,
-                output: match &result.output {
-                    Some(content) => Some(
-                        content
-                            .chars()
-                            .map(|x| if x.is_control() { ' ' } else { x })
-                            .collect(),
-                    ),
-                    None => None,
-                },
-                status: result.status.clone(),
-            })
+        for result in step_result.apicallresults.iter_mut() {
+            if let Some(old_output) = &result.output {
+                result.output = Some(
+                    old_output
+                        .chars()
+                        .map(|x| if x.is_control() { ' ' } else { x })
+                        .collect()
+                )
+            }
         }
 
-        StepResult::from(&new_api_call_results_list)
+        step_result
     }
 }
