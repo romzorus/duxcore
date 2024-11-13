@@ -33,7 +33,10 @@ impl ApiCallResult {
                     //     .chars()
                     //     .map(|x| if x.is_control() { ' ' } else { x })
                     //     .collect()
-                    raw_output_content.chars().filter(|c| c.is_ascii()).collect()
+                    raw_output_content
+                        .chars()
+                        .filter(|c| c.is_ascii() && ! c.is_control())
+                        .collect()
                 )
             }
             None => None
