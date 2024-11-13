@@ -24,7 +24,20 @@ impl ApiCallResult {
         }
     }
 
-    pub fn from(rc: Option<i32>, output: Option<String>, status: ApiCallStatus) -> ApiCallResult {
+    pub fn from(rc: Option<i32>, raw_output: Option<String>, status: ApiCallStatus) -> ApiCallResult {
+
+        let output = match raw_output {
+            Some(raw_output_content) => {
+                Some(
+                    raw_output_content
+                        .chars()
+                        .map(|x| if x.is_control() { ' ' } else { x })
+                        .collect()
+                )
+            }
+            None => None
+        };
+        
         ApiCallResult { rc, output, status }
     }
 }
