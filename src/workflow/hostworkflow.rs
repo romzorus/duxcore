@@ -142,10 +142,30 @@ impl DuxContext {
     }
 
     pub fn set_var(&mut self, key: &str, value: &str) {
-        self.tera_context.insert(key, value);
+        let mut checked_value = value.to_string();
+
+        checked_value
+            .chars()
+            .map(|x| if x.is_control() { ' ' } else { x })
+            .collect::<String>();
+
+        self.tera_context.insert(
+            key,
+            checked_value.as_str()
+        );
     }
 
     pub fn save_var(&mut self, key: String, value: String) {
-        self.vars.insert(key, value);
+        let mut checked_value = value.to_string();
+
+        checked_value
+            .chars()
+            .map(|x| if x.is_control() { ' ' } else { x })
+            .collect::<String>();
+
+        self.vars.insert(
+            key,
+            checked_value
+        );
     }
 }

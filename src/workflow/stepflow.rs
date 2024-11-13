@@ -53,6 +53,18 @@ impl StepFlow {
             }
         };
 
+        if let Some(variable_name) = &self.step_expected.register {
+            dux_context.tera_context.insert(variable_name, &StepResult::none());
+            dux_context.save_var(
+                format!("{}_rc", variable_name),
+                "None".into()
+            );
+            dux_context.save_var(
+                format!("{}_output", variable_name),
+                "None".into()
+            );
+        }
+
         match self
             .step_expected
             .moduleblock
