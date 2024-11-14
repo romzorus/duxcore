@@ -33,13 +33,11 @@ impl ModuleBlockExpectedState {
         tera_context: &mut tera::Context,
     ) -> Result<ModuleBlockExpectedState, Error> {
         // TODO : is this the best way to do this ?
-        let serialized_self = serde_json::to_string(self).unwrap()
-            .chars()
-            .map(|x| if x.is_ascii_control() || x.is_control() { ' ' } else { x })
-            .collect::<String>();
-
+        let re = Regex::new(r"[\u{0000}-\u{001F}\u{007F}-\u{009F}]").unwrap();
+        let serialized_self = serde_json::to_string(self).unwrap();
+        let new_output = re.replace_all(serialized_self.as_str(), "").to_string();
         let context_wise_serialized_self =
-            Tera::one_off(serialized_self.as_str(), tera_context, true).unwrap();
+            Tera::one_off(new_output.as_str(), tera_context, true).unwrap();
         match serde_json::from_str::<ModuleBlockExpectedState>(&context_wise_serialized_self) {
             Ok(context_wise_moduleblock) => Ok(context_wise_moduleblock),
             Err(error) => Err(Error::FailureToParseContent(format!("{}", error))),
