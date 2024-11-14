@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use regex::Regex;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ApiCallResult {
@@ -28,16 +29,15 @@ impl ApiCallResult {
 
         let output = match raw_output {
             Some(raw_output_content) => {
-                Some(
-                    raw_output_content
-                        .chars()
-                        .map(|x| if x.is_ascii_control() || x.is_control() { ' ' } else { x })
-                        .collect()
-                    // raw_output_content
-                    //     .chars()
-                    //     .filter(|c| ! c.is_ascii_control() && ! c.is_control())
-                    //     .collect()
-                )
+                let re = Regex::new(r"[\u{0000}-\u{001F}\u{007F}-\u{009F}]").unwrap();
+                
+                // let new_output = raw_output_content
+                    // .chars()
+                    // .map(|x| if x.is_ascii_control() || x.is_control() { ' ' } else { x })
+                    // .collect();
+                let new_output = re.replace_all(raw_output_content.as_str(), "").to_string();
+
+                Some(new_output)
             }
             None => None
         };
