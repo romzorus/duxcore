@@ -29,14 +29,14 @@ impl ApiCallResult {
         let output = match raw_output {
             Some(raw_output_content) => {
                 Some(
-                    // raw_output_content
-                    //     .chars()
-                    //     .map(|x| if x.is_control() { ' ' } else { x })
-                    //     .collect()
                     raw_output_content
                         .chars()
-                        .filter(|c| ! c.is_ascii_control() && ! c.is_control())
+                        .map(|x| if x.is_ascii_control() || x.is_control() { ' ' } else { x })
                         .collect()
+                    // raw_output_content
+                    //     .chars()
+                    //     .filter(|c| ! c.is_ascii_control() && ! c.is_control())
+                    //     .collect()
                 )
             }
             None => None
