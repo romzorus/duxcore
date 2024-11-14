@@ -82,7 +82,7 @@ impl LocalHostHandler {
         match result {
             Ok(output) => Ok(CmdResult {
                 rc: output.status.code().unwrap(),
-                stdout: String::from_utf8_lossy(&output.stdout).replace(r"\n", "\n").to_string(),
+                stdout: String::from_utf8_lossy(&output.stdout).replace(r"\n", "\\n").to_string(),
             }),
             Err(e) => Err(Error::FailureToRunCommand(format!("{}", e))),
         }
