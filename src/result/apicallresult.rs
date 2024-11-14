@@ -32,9 +32,9 @@ impl ApiCallResult {
                 let parsed_raw_output = raw_output
                     .chars()
                     .filter(|&c| !c.is_control() && !c.is_other_control())
-                    .collect();
+                    .collect::<String>();
 
-                Some(parsed_raw_output)
+                Some(parsed_raw_output.trim().into())
             }
             None => None
         };
