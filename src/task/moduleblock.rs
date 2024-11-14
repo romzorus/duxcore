@@ -6,6 +6,7 @@ use crate::result::apicallresult::ApiCallResult;
 use crate::step::stepchange::StepChange;
 use serde::{Deserialize, Serialize};
 use tera::{Context, Tera};
+use unicode_categories::UnicodeCategories;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -33,7 +34,10 @@ impl ModuleBlockExpectedState {
     ) -> Result<ModuleBlockExpectedState, Error> {
         // TODO : is this the best way to do this ?
 
-        let serialized_self = serde_json::to_string(self).unwrap();
+        let serialized_self: String = serde_json::to_string(self).unwrap()
+            .chars()
+            .filter(|&c| !c.is_control() && !c.is_other_control())
+            .collect();
 
         println!("[DEBUG consider_context] serialized_self : {:?}", serialized_self);
         println!("[DEBUG tera_context] tera_context : {:?}", tera_context);
