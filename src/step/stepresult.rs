@@ -34,7 +34,7 @@ impl StepResult {
                 output_list.push_str(
                     format!("{} \\n", api_call_result_output
                             .chars()
-                            .map(|x| if x.is_control() { ' ' } else { x })
+                            .filter(|c| !x.is_control())
                             .collect::<String>()
                     ).as_str()
                 );
