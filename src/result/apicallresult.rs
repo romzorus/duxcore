@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use regex::Regex;
+use unicode_categories::UnicodeCategories;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ApiCallResult {
@@ -25,24 +25,21 @@ impl ApiCallResult {
         }
     }
 
-    pub fn from(rc: Option<i32>, raw_output: Option<String>, status: ApiCallStatus) -> ApiCallResult {
+    pub fn from(rc: Option<i32>, output: Option<String>, status: ApiCallStatus) -> ApiCallResult {
+       
+        let new_output = match output {
+            Some(raw_output) => {
+                let parsed_raw_output = raw_output
+                    .chars()
+                    .filter(|&c| !c.is_control() && !c.is_other_control())
+                    .collect();
 
-        let output = match raw_output {
-            Some(raw_output_content) => {
-                let re = Regex::new(r"[\u{0000}-\u{001F}\u{007F}-\u{009F}]").unwrap();
-                
-                // let new_output = raw_output_content
-                    // .chars()
-                    // .map(|x| if x.is_ascii_control() || x.is_control() { ' ' } else { x })
-                    // .collect();
-                let new_output = re.replace_all(raw_output_content.as_str(), "").to_string();
-
-                Some(new_output)
+                Some(parsed_raw_output)
             }
             None => None
         };
-        
-        ApiCallResult { rc, output, status }
+
+        ApiCallResult { rc, output: new_output, status }
     }
 }
 
