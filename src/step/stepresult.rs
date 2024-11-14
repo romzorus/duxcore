@@ -32,7 +32,7 @@ impl StepResult {
         for api_call_result in apicallresults.clone().iter() {
             if let Some(api_call_result_output) = &api_call_result.output {
                 output_list.push_str(
-                    format!("{} \\n", api_call_result_output
+                    format!("{} \\n", api_call_result_output.replace('\n', "\\n")
                             .chars()
                             .filter(|c| !c.is_control())
                             .collect::<String>()
