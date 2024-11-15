@@ -34,12 +34,6 @@ impl ModuleBlockExpectedState {
         // TODO : is this the best way to do this ?
 
         let serialized_self = serde_json::to_string(self).unwrap();
-
-        println!(
-            "[DEBUG consider_context] serialized_self : {:?}",
-            serialized_self
-        );
-        println!("[DEBUG tera_context] tera_context : {:?}", tera_context);
         let context_wise_serialized_self =
             Tera::one_off(serialized_self.as_str(), tera_context, true).unwrap();
         match serde_json::from_str::<ModuleBlockExpectedState>(&context_wise_serialized_self) {
