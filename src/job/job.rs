@@ -111,7 +111,16 @@ impl Job {
         }
     }
 
-    // Define the task list
+    /// Define the task list from a TaskList
+    pub fn set_tasklist(
+        &mut self,
+        task_list: TaskList
+    ) -> &mut Self {
+        self.tasklist = Some(task_list);
+        self
+    }
+
+    /// Define the task list from a str
     pub fn set_tasklist_from_str(
         &mut self,
         raw_content: &str,
@@ -126,6 +135,7 @@ impl Job {
         }
     }
 
+    /// Define the task list from a given file path
     pub fn set_tasklist_from_file(
         &mut self,
         file_path: &str,
