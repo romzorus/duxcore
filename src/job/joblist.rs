@@ -1,25 +1,24 @@
 use rayon::iter::IntoParallelRefMutIterator;
 use rayon::iter::ParallelIterator;
 
-use crate::job::job::Job;
-use crate::output::joblist_output::JobListOutput;
-use crate::host::hostlist::HostList;
-use crate::workflow::hostworkflow::DuxContext;
 use crate::connection::host_connection::HostConnectionInfo;
 use crate::error::Error;
-use crate::task::tasklist::TaskListFileType;
+use crate::host::hostlist::HostList;
+use crate::job::job::Job;
+use crate::output::joblist_output::JobListOutput;
 use crate::task::tasklist::TaskList;
+use crate::task::tasklist::TaskListFileType;
 
 /// A JobList is just a Vec of Jobs on which convenient methods are defined. It simplifies the handling of multiple hosts.
 #[derive(Debug, Clone)]
 pub struct JobList {
-    pub job_list: Option<Vec<Job>>
+    pub job_list: Option<Vec<Job>>,
 }
 
 impl JobList {
     pub fn new() -> JobList {
         JobList {
-            job_list: Some(Vec::new())
+            job_list: Some(Vec::new()),
         }
     }
 
@@ -30,28 +29,21 @@ impl JobList {
                 let mut jobs: Vec<Job> = Vec::new();
 
                 for host in host_list_content {
-                    let mut job = Job::new();
-                    job.set_address(&host.address).unwrap();
-                    job.set_context(DuxContext::from(host));
-
-                    jobs.push(job);
-
+                    jobs.push(Job::from_host(host));
                 }
 
-                JobList { job_list: Some(jobs) }
+                JobList {
+                    job_list: Some(jobs),
                 }
-            None => {
-                JobList { job_list: None }
             }
+            None => JobList { job_list: None },
         }
     }
 
     pub fn from_hostlist_as_str(raw_content: &str) -> Result<JobList, Error> {
         match HostList::from_str(raw_content) {
-            Ok(host_list_content) => {
-                Ok(JobList::from_hostlist(host_list_content))
-            }
-            Err(error) => Err(error)
+            Ok(host_list_content) => Ok(JobList::from_hostlist(host_list_content)),
+            Err(error) => Err(error),
         }
     }
 
@@ -94,35 +86,28 @@ impl JobList {
                     job.host_connection_info = host_connection_info.clone();
                 }
             }
-            
+
             Ok(self)
         }
-    }
-
-    /// Set the same context for all hosts of the JobList
-    pub fn set_context(&mut self, context: DuxContext) -> &mut Self {
-        if let Some(jobs) = &mut self.job_list {
-            for job in jobs {
-                job.context = context.clone();
-            }
-        }
-        
-        self
     }
 
     /// Add the same variable for each host of the JobList
     pub fn set_var(&mut self, key: &str, value: &str) -> &mut Self {
         if let Some(jobs) = &mut self.job_list {
             for job in jobs {
-                job.context.set_var(key, value);
+                job.add_var(key, value);
             }
         }
-        
+
         self
     }
 
     /// Set the given tasklist for all hosts of the JobList
-    pub fn set_tasklist_from_str(&mut self, raw_content: &str, content_type: TaskListFileType) -> Result<&mut Self, Error>{
+    pub fn set_tasklist_from_str(
+        &mut self,
+        raw_content: &str,
+        content_type: TaskListFileType,
+    ) -> Result<&mut Self, Error> {
         if let Some(jobs) = &mut self.job_list {
             match TaskList::from_str(raw_content, content_type) {
                 Ok(task_list) => {
@@ -132,14 +117,18 @@ impl JobList {
                 }
                 Err(error) => {
                     return Err(error);
-                },
+                }
             }
         }
         Ok(self)
     }
 
     /// Set the given tasklist for all hosts of the JobList
-    pub fn set_tasklist_from_file(&mut self, file_path: &str, content_type: TaskListFileType) -> Result<&mut Self, Error>{
+    pub fn set_tasklist_from_file(
+        &mut self,
+        file_path: &str,
+        content_type: TaskListFileType,
+    ) -> Result<&mut Self, Error> {
         if let Some(jobs) = &mut self.job_list {
             match TaskList::from_file(file_path, content_type) {
                 Ok(task_list) => {
@@ -149,7 +138,7 @@ impl JobList {
                 }
                 Err(error) => {
                     return Err(error);
-                },
+                }
             }
         }
         Ok(self)
@@ -158,22 +147,18 @@ impl JobList {
     /// "DRY_RUN" the task list on each host of this JobList. This is done in parallel (based on the Rayon crate).
     pub fn dry_run(&mut self) -> Result<(), Error> {
         if let Some(jobs) = &mut self.job_list {
-            jobs.par_iter_mut().for_each(|job| 
-                job.dry_run().unwrap()
-            );
+            jobs.par_iter_mut().for_each(|job| job.dry_run().unwrap());
         }
-        
+
         Ok(())
     }
 
     /// "APPLY" the task list on each host of this JobList. This is done in parallel (based on the Rayon crate).
     pub fn apply(&mut self) -> Result<(), Error> {
         if let Some(jobs) = &mut self.job_list {
-            jobs.par_iter_mut().for_each(|job| 
-                job.apply().unwrap()
-            );
+            jobs.par_iter_mut().for_each(|job| job.apply().unwrap());
         }
-        
+
         Ok(())
     }
 }

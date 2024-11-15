@@ -1,14 +1,14 @@
 use crate::connection::hosthandler::HostHandler;
 use crate::error::Error;
 use crate::task::taskblock::TaskBlock;
-use crate::workflow::hostworkflow::DuxContext;
 use crate::workflow::stepflow::{StepFlow, StepStatus};
+use serde::{Deserialize, Serialize};
 
 /// A TaskFlow withholds all step flows, a flow being being the combination of :
 /// - an expected state
 /// - changes required to have the host match this expected state
 /// - results of actually trying to enforce these changes
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct TaskFlow {
     pub name: Option<String>,
     pub with_sudo: Option<bool>,
@@ -41,12 +41,12 @@ impl TaskFlow {
     pub fn dry_run(
         &mut self,
         hosthandler: &mut HostHandler,
-        dux_context: &mut DuxContext,
+        tera_context: &mut tera::Context,
     ) -> Result<(), Error> {
         let mut changes_required = false;
 
         for step_flow in self.step_flows.iter_mut() {
-            match step_flow.dry_run(hosthandler, dux_context) {
+            match step_flow.dry_run(hosthandler, tera_context) {
                 Ok(()) => {
                     if let StepStatus::ChangeRequired = step_flow.step_status {
                         changes_required = true;
@@ -70,12 +70,12 @@ impl TaskFlow {
     pub fn apply(
         &mut self,
         hosthandler: &mut HostHandler,
-        dux_context: &mut DuxContext,
+        tera_context: &mut tera::Context,
     ) -> Result<(), Error> {
         let mut task_status = TaskStatus::ApplySuccesful;
 
         for step_flow in self.step_flows.iter_mut() {
-            match step_flow.apply(hosthandler, dux_context) {
+            match step_flow.apply(hosthandler, tera_context) {
                 Ok(()) => match &step_flow.step_status {
                     StepStatus::ApplyFailed => {
                         task_status = TaskStatus::ApplyFailed;
@@ -97,7 +97,7 @@ impl TaskFlow {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub enum TaskStatus {
     NotRunYet,
     AlreadyMatched,

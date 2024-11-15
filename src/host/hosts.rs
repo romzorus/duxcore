@@ -1,8 +1,8 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 // TODO : add a connection mode field
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Host {
     pub address: String,
     pub vars: Option<HashMap<String, String>>,
@@ -10,6 +10,14 @@ pub struct Host {
 }
 
 impl Host {
+    pub fn new() -> Host {
+        Host {
+            address: String::new(),
+            vars: None,
+            groups: None,
+        }
+    }
+
     pub fn from_string(address: String) -> Host {
         Host {
             address,

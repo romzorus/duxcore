@@ -5,9 +5,9 @@ use crate::result::apicallresult::ApiCallStatus;
 use crate::step::stepchange::StepChange;
 use crate::step::stepresult::StepResult;
 use crate::task::step::Step;
-use crate::workflow::hostworkflow::DuxContext;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct StepFlow {
     pub step_expected: Step,
     pub allowed_to_fail: bool,
@@ -33,7 +33,7 @@ impl StepFlow {
     pub fn dry_run(
         &mut self,
         hosthandler: &mut HostHandler,
-        dux_context: &mut DuxContext,
+        tera_context: &mut tera::Context,
     ) -> Result<(), Error> {
         let privilege = match self.step_expected.with_sudo {
             None => match &self.step_expected.run_as {
@@ -55,7 +55,7 @@ impl StepFlow {
         match self
             .step_expected
             .moduleblock
-            .consider_context(dux_context)
+            .consider_context(tera_context)
             .unwrap() // TODO : If register of a step is used in another step later, dry_run is impossible -> handle this case
             .dry_run_moduleblock(hosthandler, privilege)
         {
@@ -80,7 +80,7 @@ impl StepFlow {
     pub fn apply(
         &mut self,
         hosthandler: &mut HostHandler,
-        dux_context: &mut DuxContext,
+        tera_context: &mut tera::Context,
     ) -> Result<(), Error> {
         let privilege = match self.step_expected.with_sudo {
             None => match &self.step_expected.run_as {
@@ -103,7 +103,7 @@ impl StepFlow {
         match self
             .step_expected
             .moduleblock
-            .consider_context(dux_context)
+            .consider_context(tera_context)
             .unwrap()
             .dry_run_moduleblock(hosthandler, privilege)
         {
@@ -145,7 +145,7 @@ impl StepFlow {
 
                 // Register : push step result to context under the specified variable name
                 if let Some(variable_name) = &self.step_expected.register {
-                    dux_context.tera_context.insert(variable_name, &result.apicallresults);
+                    tera_context.insert(variable_name, &StepResult::from(&result.apicallresults));
                 }
 
                 self.step_status = step_status;
@@ -162,7 +162,7 @@ impl StepFlow {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub enum StepStatus {
     NotRunYet,
     AlreadyMatched,

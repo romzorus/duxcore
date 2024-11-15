@@ -71,7 +71,7 @@ impl StepChange {
                     };
                     results.push(apicallresult);
                 }
-                StepResult::from(results)
+                StepResult::from(&results)
             }
         };
 
@@ -82,15 +82,7 @@ impl StepChange {
         for result in raw_step_result.apicallresults.iter() {
             step_result.apicallresults.push(ApiCallResult {
                 rc: result.rc,
-                output: match &result.output {
-                    Some(content) => Some(
-                        content
-                            .chars()
-                            .map(|x| if x.is_control() { ' ' } else { x })
-                            .collect(),
-                    ),
-                    None => None,
-                },
+                output: result.output.clone(),
                 status: result.status.clone(),
             })
         }

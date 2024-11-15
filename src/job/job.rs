@@ -1,26 +1,26 @@
 use crate::connection::host_connection::HostConnectionInfo;
 use crate::connection::hosthandler::HostHandler;
 use crate::error::Error;
+use crate::host::hosts::Host;
 use crate::output::job_output::JobOutput;
 use crate::task::tasklist::TaskList;
 use crate::task::tasklist::TaskListFileType;
+use crate::workflow::hostworkflow::HostWorkFlow;
 use crate::workflow::hostworkflow::HostWorkFlowStatus;
-use crate::workflow::hostworkflow::{DuxContext, HostWorkFlow};
 use chrono::Utc;
 use machineid_rs::{Encryption, HWIDComponent, IdBuilder};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::time::SystemTime;
 
-
 /// The Job is the key type around which the whole automation revolves. A Job is about one host only. If you want to handle multiple hosts, you will need to have multiple Jobs (in a vec or anything else).
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Job {
-    pub address: HostAddress,
+    pub host: Host,
     pub host_connection_info: HostConnectionInfo,
     pub correlation_id: Option<String>,
     pub tasklist: Option<TaskList>,
-    pub context: DuxContext,
+    pub vars: Option<serde_json::Value>,
     pub timestamp_start: Option<String>,
     pub timestamp_end: Option<String>,
     pub hostworkflow: Option<HostWorkFlow>,
@@ -30,11 +30,11 @@ pub struct Job {
 impl Job {
     pub fn new() -> Job {
         Job {
-            address: HostAddress::Unset,
+            host: Host::new(),
             host_connection_info: HostConnectionInfo::Unset,
             correlation_id: None,
             tasklist: None,
-            context: DuxContext::new(),
+            vars: None,
             timestamp_start: None,
             timestamp_end: None,
             hostworkflow: None,
@@ -42,34 +42,32 @@ impl Job {
         }
     }
 
-    pub fn get_address(&self) -> Result<String, Error> {
-        match &self.address {
-            HostAddress::LocalHost => Ok("localhost".to_string()),
-            HostAddress::RemoteHost(address) => Ok(address.to_string()),
-            HostAddress::Unset => Err(Error::MissingInitialization(format!("Unset address"))),
-        }
+    pub fn from_host(host: Host) -> Job {
+        let mut job = Job::new();
+        job.set_address(&host.address);
+
+        let temp_tera_context_value = match &host.vars {
+            Some(vars_list) => Some(
+                tera::Context::from_serialize(vars_list)
+                    .unwrap()
+                    .into_json(),
+            ),
+            None => None,
+        };
+        job.set_vars(temp_tera_context_value);
+        job
+    }
+
+    pub fn get_address(&self) -> String {
+        self.host.address.clone()
     }
 
     /// Set host address
-    pub fn set_address(&mut self, address: &str) -> Result<&mut Self, Error> {
+    pub fn set_address(&mut self, address: &str) -> &mut Self {
         // TODO : Add controls on address content (invalid address with spaces or else...)
-        match address.to_lowercase().as_str() {
-            "localhost" => {
-                self.address = HostAddress::LocalHost;
-                Ok(self)
-            }
-            "127.0.0.1" => {
-                self.address = HostAddress::LocalHost;
-                Ok(self)
-            }
-            "" => {
-                return Err(Error::WrongInitialization(format!("Empty address")));
-            }
-            _ => {
-                self.address = HostAddress::RemoteHost(address.to_string());
-                Ok(self)
-            }
-        }
+        self.host.address = address.to_string();
+
+        self
     }
 
     /// Using a correlation id can be required in a distributed environment. If a machine is building Jobs and sending it to worker nodes, then the results will probably arrive in a random order, meaning it will hard to identify which results belong to which Job unless we use correlation ids.
@@ -142,88 +140,108 @@ impl Job {
         }
     }
 
-    pub fn set_context(&mut self, context: DuxContext) -> &mut Self {
-        self.context = context;
+    pub fn add_var(&mut self, key: &str, value: &str) -> &mut Self {
+        match &self.vars {
+            Some(old_tera_context_value) => {
+                let mut tera_context_temp =
+                    tera::Context::from_value(old_tera_context_value.clone()).unwrap();
+                tera_context_temp.insert(key, value);
+                self.vars = Some(tera_context_temp.into_json());
+            }
+            None => {
+                let mut tera_context_temp = tera::Context::new();
+                tera_context_temp.insert(key, value);
+                self.vars = Some(tera_context_temp.into_json());
+            }
+        }
         self
     }
 
-    pub fn set_var(&mut self, key: &str, value: &str) -> &mut Self {
-        self.context.set_var(key, value);
+    pub fn set_vars(&mut self, vars: Option<serde_json::Value>) -> &mut Self {
+        self.vars = vars;
         self
     }
 
     /// "DRY_RUN" this job -> evaluate the difference between the expected state and the actual state of the given host
     pub fn dry_run(&mut self) -> Result<(), Error> {
         // Build a HostHandler
-        let mut host_handler = match &self.address {
-            HostAddress::Unset => {
-                return Err(Error::MissingInitialization("address not set".into()));
-            }
-            HostAddress::LocalHost => {
-                HostHandler::from("localhost".into(), self.host_connection_info.clone()).unwrap()
-            }
-            HostAddress::RemoteHost(host_address) => {
-                HostHandler::from(host_address.into(), self.host_connection_info.clone()).unwrap()
-            }
-        };
+        let mut host_handler =
+            HostHandler::from(self.host.address.clone(), self.host_connection_info.clone())
+                .unwrap();
+        if let Err(error) = host_handler.init() {
+            return Err(error);
+        }
 
-        host_handler.init();
+        // Build a context
+        let mut temp_tera_context = match &self.vars {
+            Some(context_value) => tera::Context::from_value(context_value.clone()).unwrap(),
+            None => tera::Context::new(),
+        };
 
         self.timestamp_start = Some(format!("{}", Utc::now().format("%+").to_string()));
 
         match &mut self.hostworkflow {
             Some(host_work_flow) => {
-                host_work_flow.dry_run(&mut host_handler, &mut self.context)?;
+                host_work_flow.dry_run(&mut host_handler, &mut temp_tera_context)?;
                 self.final_status = host_work_flow.final_status.clone();
             }
             None => {
-                let mut host_work_flow =
-                    HostWorkFlow::from(&self.tasklist.as_mut().unwrap());
-                host_work_flow.dry_run(&mut host_handler, &mut self.context)?;
+                let mut host_work_flow = HostWorkFlow::from(&self.tasklist.as_mut().unwrap());
+                host_work_flow.dry_run(&mut host_handler, &mut temp_tera_context)?;
                 self.final_status = host_work_flow.final_status.clone();
                 self.hostworkflow = Some(host_work_flow);
             }
         }
 
         self.timestamp_end = Some(format!("{}", Utc::now().format("%+").to_string()));
-
+        match temp_tera_context.clone().into_json() {
+            serde_json::Value::Null => {
+                self.vars = None;
+            }
+            _ => self.vars = Some(temp_tera_context.into_json()),
+        }
         Ok(())
     }
 
     /// "APPLY" this job -> evaluate what needs to be done to reach the expected state, then do it
     pub fn apply(&mut self) -> Result<(), Error> {
         // Build a HostHandler
-        let mut host_handler = match &self.address {
-            HostAddress::Unset => {
-                return Err(Error::MissingInitialization("address not set".into()));
-            }
-            HostAddress::LocalHost => {
-                HostHandler::from("localhost".into(), self.host_connection_info.clone()).unwrap()
-            }
-            HostAddress::RemoteHost(host_address) => {
-                HostHandler::from(host_address.into(), self.host_connection_info.clone()).unwrap()
-            }
-        };
+        let mut host_handler =
+            HostHandler::from(self.host.address.clone(), self.host_connection_info.clone())
+                .unwrap();
+        if let Err(error) = host_handler.init() {
+            return Err(error);
+        }
 
-        host_handler.init();
+        // Build a context
+        let mut temp_tera_context = match &self.vars {
+            Some(context_value) => tera::Context::from_value(context_value.clone()).unwrap(),
+            None => tera::Context::new(),
+        };
 
         self.timestamp_start = Some(format!("{}", Utc::now().format("%+").to_string()));
 
         match &mut self.hostworkflow {
             Some(host_work_flow) => {
-                host_work_flow.apply(&mut host_handler, &mut self.context)?;
+                host_work_flow.apply(&mut host_handler, &mut temp_tera_context)?;
                 self.final_status = host_work_flow.final_status.clone();
             }
             None => {
-                let mut host_work_flow =
-                    HostWorkFlow::from(&self.tasklist.as_mut().unwrap());
-                host_work_flow.apply(&mut host_handler, &mut self.context)?;
+                let mut host_work_flow = HostWorkFlow::from(&self.tasklist.as_mut().unwrap());
+                host_work_flow.apply(&mut host_handler, &mut temp_tera_context)?;
                 self.final_status = host_work_flow.final_status.clone();
                 self.hostworkflow = Some(host_work_flow);
             }
         }
 
         self.timestamp_end = Some(format!("{}", Utc::now().format("%+").to_string()));
+
+        match temp_tera_context.into_json() {
+            serde_json::Value::Null => {
+                self.vars = None;
+            }
+            any_other_value => self.vars = Some(any_other_value),
+        }
 
         Ok(())
     }
@@ -257,7 +275,7 @@ pub enum JobFinalStatus {
     GenericFailed(String),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub enum HostAddress {
     Unset,
     LocalHost,

@@ -1,13 +1,10 @@
 use crate::connection::hosthandler::HostHandler;
 use crate::error::Error;
-use crate::host::hosts::Host;
 use crate::task::tasklist::TaskList;
 use crate::workflow::taskflow::{TaskFlow, TaskStatus};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use tera::Context;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct HostWorkFlow {
     pub task_flows: Vec<TaskFlow>,
     pub final_status: HostWorkFlowStatus,
@@ -35,11 +32,15 @@ impl HostWorkFlow {
         }
     }
 
-    pub fn dry_run(&mut self, hosthandler: &mut HostHandler, dux_context: &mut DuxContext) -> Result<(), Error> {
+    pub fn dry_run(
+        &mut self,
+        hosthandler: &mut HostHandler,
+        tera_context: &mut tera::Context,
+    ) -> Result<(), Error> {
         let mut changes_required = false;
 
         for task_flow in self.task_flows.iter_mut() {
-            match task_flow.dry_run(hosthandler, dux_context) {
+            match task_flow.dry_run(hosthandler, tera_context) {
                 Ok(()) => {
                     if let TaskStatus::ChangeRequired = task_flow.task_status {
                         changes_required = true;
@@ -60,7 +61,11 @@ impl HostWorkFlow {
         Ok(())
     }
     // pub fn apply(&mut self, hosthandler: &mut HostHandler) -> Result<(), Error> {
-    pub fn apply(&mut self, hosthandler: &mut HostHandler, dux_context: &mut DuxContext) -> Result<(), Error> {
+    pub fn apply(
+        &mut self,
+        hosthandler: &mut HostHandler,
+        tera_context: &mut tera::Context,
+    ) -> Result<(), Error> {
         if let HostWorkFlowStatus::AlreadyMatched = self.final_status {
             // Nothing to do, dry_run was performed before and concluded that nothing is to be
         } else {
@@ -69,7 +74,7 @@ impl HostWorkFlow {
             let mut failures = false;
 
             for task_flow in self.task_flows.iter_mut() {
-                match task_flow.apply(hosthandler, dux_context) {
+                match task_flow.apply(hosthandler, tera_context) {
                     Ok(()) => match task_flow.task_status {
                         TaskStatus::ApplySuccesful => {
                             already_matched = false;
@@ -113,34 +118,4 @@ pub enum HostWorkFlowStatus {
     ApplySuccesful,
     ApplyWithAllowedFailure,
     ApplyFailed,
-}
-
-/// Withholds variables, either defined in advance by the user in HostList and/or Tasklist or defined at runtime (output of a Step saved as a variable). This struct is accessible by each step during the tasklist traversal.
-#[derive(Clone, Debug)]
-pub struct DuxContext {
-    pub vars: HashMap<String, String>,
-    pub tera_context: Context,
-}
-
-impl DuxContext {
-    pub fn new() -> DuxContext {
-        DuxContext {
-            vars: HashMap::new(),
-            tera_context: Context::new(),
-        }
-    }
-
-    pub fn from(host: Host) -> DuxContext {
-        match host.vars {
-            Some(vars) => DuxContext {
-                vars: vars.clone(),
-                tera_context: Context::from_serialize(vars).unwrap(),
-            },
-            None => DuxContext::new(),
-        }
-    }
-
-    pub fn set_var(&mut self, key: &str, value: &str) {
-        self.tera_context.insert(key, value);
-    }
 }
