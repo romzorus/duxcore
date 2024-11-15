@@ -14,10 +14,10 @@ impl Host {
         Host {
             address: String::new(),
             vars: None,
-            groups: None
+            groups: None,
         }
     }
-    
+
     pub fn from_string(address: String) -> Host {
         Host {
             address,

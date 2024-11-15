@@ -1,30 +1,26 @@
 use crate::connection::host_connection::HostConnectionInfo;
 use crate::connection::hosthandler::HostHandler;
-use std::collections::HashMap;
 use crate::error::Error;
+use crate::host::hosts::Host;
 use crate::output::job_output::JobOutput;
 use crate::task::tasklist::TaskList;
 use crate::task::tasklist::TaskListFileType;
+use crate::workflow::hostworkflow::HostWorkFlow;
 use crate::workflow::hostworkflow::HostWorkFlowStatus;
-use crate::workflow::hostworkflow::{DuxContext, HostWorkFlow};
-use crate::host::hosts::Host;
 use chrono::Utc;
 use machineid_rs::{Encryption, HWIDComponent, IdBuilder};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::time::SystemTime;
 
-
 /// The Job is the key type around which the whole automation revolves. A Job is about one host only. If you want to handle multiple hosts, you will need to have multiple Jobs (in a vec or anything else).
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Job {
     pub host: Host,
-    // pub address: HostAddress,
     pub host_connection_info: HostConnectionInfo,
     pub correlation_id: Option<String>,
     pub tasklist: Option<TaskList>,
-    // pub context: DuxContext,
-    pub vars: Option<HashMap<String, String>>,
+    pub vars: Option<serde_json::Value>,
     pub timestamp_start: Option<String>,
     pub timestamp_end: Option<String>,
     pub hostworkflow: Option<HostWorkFlow>,
@@ -35,11 +31,9 @@ impl Job {
     pub fn new() -> Job {
         Job {
             host: Host::new(),
-            // address: HostAddress::Unset,
             host_connection_info: HostConnectionInfo::Unset,
             correlation_id: None,
             tasklist: None,
-            // context: DuxContext::new(),
             vars: None,
             timestamp_start: None,
             timestamp_end: None,
@@ -51,7 +45,16 @@ impl Job {
     pub fn from_host(host: Host) -> Job {
         let mut job = Job::new();
         job.set_address(&host.address);
-        job.set_vars(&host.vars);
+
+        let temp_tera_context_value = match &host.vars {
+            Some(vars_list) => Some(
+                tera::Context::from_serialize(vars_list)
+                    .unwrap()
+                    .into_json(),
+            ),
+            None => None,
+        };
+        job.set_vars(temp_tera_context_value);
         job
     }
 
@@ -137,83 +140,108 @@ impl Job {
         }
     }
 
-    pub fn set_var(&mut self, key: &str, value: &str) -> &mut Self {
-        match &mut self.vars {
-            Some(var_list) => {
-                var_list.insert(key.to_string(), value.to_string());
+    pub fn add_var(&mut self, key: &str, value: &str) -> &mut Self {
+        match &self.vars {
+            Some(old_tera_context_value) => {
+                let mut tera_context_temp =
+                    tera::Context::from_value(old_tera_context_value.clone()).unwrap();
+                tera_context_temp.insert(key, value);
+                self.vars = Some(tera_context_temp.into_json());
             }
             None => {
-                let mut var_list = HashMap::new();
-                var_list.insert(key.to_string(), value.to_string());
-
+                let mut tera_context_temp = tera::Context::new();
+                tera_context_temp.insert(key, value);
+                self.vars = Some(tera_context_temp.into_json());
             }
         }
         self
     }
 
-    pub fn set_vars(&mut self, vars: &Option<HashMap<String, String>>) -> &mut Self {
-        self.vars = vars.clone();
+    pub fn set_vars(&mut self, vars: Option<serde_json::Value>) -> &mut Self {
+        self.vars = vars;
         self
     }
 
     /// "DRY_RUN" this job -> evaluate the difference between the expected state and the actual state of the given host
     pub fn dry_run(&mut self) -> Result<(), Error> {
         // Build a HostHandler
-        let mut host_handler = HostHandler::from(self.host.address.clone(), self.host_connection_info.clone()).unwrap();
-        host_handler.init();
+        let mut host_handler =
+            HostHandler::from(self.host.address.clone(), self.host_connection_info.clone())
+                .unwrap();
+        if let Err(error) = host_handler.init() {
+            return Err(error);
+        }
 
-        // Build a DuxContext
-        let mut dux_context = DuxContext::from_vars(self.vars.clone());
+        // Build a context
+        let mut temp_tera_context = match &self.vars {
+            Some(context_value) => tera::Context::from_value(context_value.clone()).unwrap(),
+            None => tera::Context::new(),
+        };
 
         self.timestamp_start = Some(format!("{}", Utc::now().format("%+").to_string()));
 
         match &mut self.hostworkflow {
             Some(host_work_flow) => {
-                host_work_flow.dry_run(&mut host_handler, &mut dux_context)?;
+                host_work_flow.dry_run(&mut host_handler, &mut temp_tera_context)?;
                 self.final_status = host_work_flow.final_status.clone();
             }
             None => {
-                let mut host_work_flow =
-                    HostWorkFlow::from(&self.tasklist.as_mut().unwrap());
-                host_work_flow.dry_run(&mut host_handler, &mut dux_context)?;
+                let mut host_work_flow = HostWorkFlow::from(&self.tasklist.as_mut().unwrap());
+                host_work_flow.dry_run(&mut host_handler, &mut temp_tera_context)?;
                 self.final_status = host_work_flow.final_status.clone();
                 self.hostworkflow = Some(host_work_flow);
             }
         }
 
         self.timestamp_end = Some(format!("{}", Utc::now().format("%+").to_string()));
-        self.vars = Some(dux_context.vars);
-
+        match temp_tera_context.clone().into_json() {
+            serde_json::Value::Null => {
+                self.vars = None;
+            }
+            _ => self.vars = Some(temp_tera_context.into_json()),
+        }
         Ok(())
     }
 
     /// "APPLY" this job -> evaluate what needs to be done to reach the expected state, then do it
     pub fn apply(&mut self) -> Result<(), Error> {
         // Build a HostHandler
-        let mut host_handler = HostHandler::from(self.host.address.clone(), self.host_connection_info.clone()).unwrap();
-        host_handler.init();
+        let mut host_handler =
+            HostHandler::from(self.host.address.clone(), self.host_connection_info.clone())
+                .unwrap();
+        if let Err(error) = host_handler.init() {
+            return Err(error);
+        }
 
-        // Build a DuxContext
-        let mut dux_context = DuxContext::from_vars(self.vars.clone());
+        // Build a context
+        let mut temp_tera_context = match &self.vars {
+            Some(context_value) => tera::Context::from_value(context_value.clone()).unwrap(),
+            None => tera::Context::new(),
+        };
 
         self.timestamp_start = Some(format!("{}", Utc::now().format("%+").to_string()));
 
         match &mut self.hostworkflow {
             Some(host_work_flow) => {
-                host_work_flow.apply(&mut host_handler, &mut dux_context)?;
+                host_work_flow.apply(&mut host_handler, &mut temp_tera_context)?;
                 self.final_status = host_work_flow.final_status.clone();
             }
             None => {
-                let mut host_work_flow =
-                    HostWorkFlow::from(&self.tasklist.as_mut().unwrap());
-                host_work_flow.apply(&mut host_handler, &mut dux_context)?;
+                let mut host_work_flow = HostWorkFlow::from(&self.tasklist.as_mut().unwrap());
+                host_work_flow.apply(&mut host_handler, &mut temp_tera_context)?;
                 self.final_status = host_work_flow.final_status.clone();
                 self.hostworkflow = Some(host_work_flow);
             }
         }
 
         self.timestamp_end = Some(format!("{}", Utc::now().format("%+").to_string()));
-        self.vars = Some(dux_context.vars);
+
+        match temp_tera_context.into_json() {
+            serde_json::Value::Null => {
+                self.vars = None;
+            }
+            any_other_value => self.vars = Some(any_other_value),
+        }
 
         Ok(())
     }

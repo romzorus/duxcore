@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StepResult {
-    pub rc: Option<i32>, // Last RC of last ApiCallResult
+    pub rc: Option<i32>,        // Last RC of last ApiCallResult
     pub output: Option<String>, // Concatenation of all ApiCallResult outputs
     pub apicallresults: Vec<ApiCallResult>,
 }
@@ -32,7 +32,15 @@ impl StepResult {
         for api_call_result in apicallresults.clone().iter() {
             if let Some(api_call_result_output) = &api_call_result.output {
                 output_list.push_str(
-                    format!("{}\n", api_call_result_output).as_str()
+                    format!(
+                        "{}",
+                        api_call_result_output
+                            .replace('\n', "\\n")
+                            .chars()
+                            .filter(|c| !c.is_control())
+                            .collect::<String>()
+                    )
+                    .as_str(),
                 );
             }
             match api_call_result.rc {
@@ -47,7 +55,7 @@ impl StepResult {
         StepResult {
             rc: Some(final_rc),
             output: Some(output_list),
-            apicallresults: apicallresults.clone()
+            apicallresults: apicallresults.clone(),
         }
     }
 }
