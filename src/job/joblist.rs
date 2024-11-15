@@ -92,7 +92,7 @@ impl JobList {
     }
 
     /// Add the same variable for each host of the JobList
-    pub fn set_var(&mut self, key: &str, value: &str) -> &mut Self {
+    pub fn add_var(&mut self, key: &str, value: &str) -> &mut Self {
         if let Some(jobs) = &mut self.job_list {
             for job in jobs {
                 job.add_var(key, value);
