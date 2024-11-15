@@ -23,7 +23,7 @@ use duxcore::prelude::*;
 fn main() {
 
     // First we need to define what the expected state of the target host is.
-    let my_tasklist = "---
+    let my_tasklist = r#"---
 - name: Let's install a web server !
   steps:
     - name: First, we test the connectivity and authentication with the host.
@@ -41,20 +41,30 @@ fn main() {
         name: '{{ service_name }}'
         state: started
         enabled: true
-        ";
+
+    - name: What date is it on this host by the way ?
+      register: host_date
+      command:
+        content: date +%Y-%m-%d" "%Hh%M
+
+    - name: Let's see...
+      debug:
+        msg: 'date: {{ host_date.output }}'
+        
+        "#;
 
     // Then we create a 'Job'.
     let mut my_job = Job::new();
 
     // We set who the target host of this Job is, and how to connect to it.
     my_job
-        .set_address("10.20.0.203").unwrap()
-        .set_connection(HostConnectionInfo::ssh2_with_key_file("dux", "controller_key")).unwrap();
+        .set_address("10.20.0.203")
+        .set_connection(HostConnectionInfo::ssh2_with_key_file("dux", "./controller_key")).unwrap();
     
     // We give it some context and the task list.
     my_job
-        .set_var("package_name", "apache2")
-        .set_var("service_name", "apache2")
+        .add_var("package_name", "apache2")
+        .add_var("service_name", "apache2")
         .set_tasklist_from_str(my_tasklist, TaskListFileType::Yaml).unwrap()
     ;
     // We can finally apply the task list to this host.
@@ -68,8 +78,8 @@ Output
 ```json
 {
   "host": "10.20.0.203",
-  "timestamp_start": "2024-11-04T23:48:40.616417861+00:00",
-  "timestamp_end": "2024-11-04T23:48:56.941517223+00:00",
+  "timestamp_start": "2024-11-15T23:14:09.114229853+00:00",
+  "timestamp_end": "2024-11-15T23:14:09.864756326+00:00",
   "final_status": "ApplySuccesful",
   "tasks": [
     {
@@ -102,13 +112,31 @@ Output
             }
           },
           "status": "ApplySuccessful"
+        },
+        {
+          "name": "What date is it on this host by the way ?",
+          "expected_state": {
+            "command": {
+              "content": "date +%Y-%m-%d\" \"%Hh%M"
+            }
+          },
+          "status": "ApplySuccessful"
+        },
+        {
+          "name": "Let's see...",
+          "expected_state": {
+            "debug": {
+              "msg": "date: 2024-11-16 00h14\n"
+            }
+          },
+          "status": "ApplySuccessful"
         }
       ]
     }
   ]
 }
 ```
-This is the basic workflow of Dux. The *Job* type, around which the whole automation revolves, is serializable/deserializable. It is then up to you to parallelize, distribute the work, display the results in some web interface or send the workload to workers via a message broker... Whatever suits you best !
+This is the basic workflow of Dux. The *Job* type, around which the whole automation revolves, is serializable/deserializable. It is then up to you to parallelize, distribute the work, display the results in some web interface or send the workload to workers via a message broker... Whatever suits you best ! To handle multiple hosts at once, use a [JobList](https://docs.rs/duxcore/latest/duxcore/job/joblist/struct.JobList.html) instead.
 
 # More examples
 
