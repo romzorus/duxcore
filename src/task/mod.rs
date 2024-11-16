@@ -1,3 +1,5 @@
+//! Dux internal representation of tasks
+
 pub mod contentformat;
 pub mod moduleblock;
 pub mod step;
