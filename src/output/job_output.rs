@@ -35,8 +35,11 @@ impl JobOutput {
         job_output.final_status = format!("{:?}", job.final_status);
 
         let mut tasks_output: Vec<TaskOutput> = Vec::new();
-        for task_flow in job.hostworkflow.as_ref().unwrap().clone().task_flows {
-            tasks_output.push(TaskOutput::from_taskflow(&task_flow, &job.vars));
+
+        if job.hostworkflow.is_some() {
+            for task_flow in job.hostworkflow.as_ref().unwrap().clone().task_flows {
+                tasks_output.push(TaskOutput::from_taskflow(&task_flow, &job.vars));
+            }
         }
         job_output.tasks = tasks_output;
 
