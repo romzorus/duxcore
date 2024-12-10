@@ -61,3 +61,21 @@ pub fn find_host_in_list(hosts_list: &Vec<Host>, host_name: &String) -> Option<u
     }
     None
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn finding_hosts_in_given_list() {
+        let hosts_list: Vec<Host> = vec![
+            Host::from_string("10.20.30.51".into()),
+            Host::from_string("10.20.30.52".into()),
+            Host::from_string("10.20.30.53".into()),
+        ];
+
+        assert!(find_host_in_list(&hosts_list, &"10.20.30.51".to_string()).is_some());
+        assert!(find_host_in_list(&hosts_list, &"192.168.10.25".to_string()).is_none());
+    }
+}

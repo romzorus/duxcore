@@ -192,3 +192,40 @@ pub fn hostlist_parser(hostlistfilecontent: &str) -> Result<HostList, Error> {
         }
     };
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn empty_hostlist_parsing() {
+        let hostlist = hostlist_parser("").unwrap();
+        assert!(hostlist.hosts.is_none());
+    }
+
+    #[test]
+    fn varless_hostlist_parsing() {
+        let hostlist = hostlist_parser(
+"---
+hosts:
+- 10.20.30.51
+- 10.20.30.52
+- 10.20.30.53
+"
+        ).unwrap();
+
+        assert!(hostlist.hosts.is_some());
+
+        let vec_hosts = hostlist.hosts.unwrap();
+        assert_eq!(vec_hosts.len(), 3);
+
+        let mut address_list: Vec<String> = Vec::new();
+        address_list.push(vec_hosts[0].address.clone());
+        address_list.push(vec_hosts[1].address.clone());
+        address_list.push(vec_hosts[2].address.clone());
+        assert!(address_list.binary_search(&"10.20.30.51".into()).is_ok());
+        assert!(address_list.binary_search(&"10.20.30.52".into()).is_ok());
+        assert!(address_list.binary_search(&"10.20.30.53".into()).is_ok());
+        assert!(address_list.binary_search(&"192.168.10.25".into()).is_err());
+    }
+}
