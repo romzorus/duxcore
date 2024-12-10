@@ -60,7 +60,7 @@ impl HostWorkFlow {
 
         Ok(())
     }
-    // pub fn apply(&mut self, hosthandler: &mut HostHandler) -> Result<(), Error> {
+
     pub fn apply(
         &mut self,
         hosthandler: &mut HostHandler,
@@ -118,4 +118,6 @@ pub enum HostWorkFlowStatus {
     ApplySuccesful,
     ApplyWithAllowedFailure,
     ApplyFailed,
+    DryRunFailed,
+    ConnectionInitFailed(String)
 }

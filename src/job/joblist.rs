@@ -147,18 +147,16 @@ impl JobList {
     /// "DRY_RUN" the task list on each host of this JobList. This is done in parallel (based on the Rayon crate).
     pub fn dry_run(&mut self) -> Result<(), Error> {
         if let Some(jobs) = &mut self.job_list {
-            jobs.par_iter_mut().for_each(|job| job.dry_run().unwrap());
+            jobs.par_iter_mut().for_each(|job| job.dry_run());
         }
 
         Ok(())
     }
 
     /// "APPLY" the task list on each host of this JobList. This is done in parallel (based on the Rayon crate).
-    pub fn apply(&mut self) -> Result<(), Error> {
+    pub fn apply(&mut self) {
         if let Some(jobs) = &mut self.job_list {
-            jobs.par_iter_mut().for_each(|job| job.apply().unwrap());
+            jobs.par_iter_mut().for_each(|job| job.apply());
         }
-
-        Ok(())
     }
 }

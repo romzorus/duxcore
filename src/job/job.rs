@@ -173,13 +173,16 @@ impl Job {
     }
 
     /// "DRY_RUN" this job -> evaluate the difference between the expected state and the actual state of the given host
-    pub fn dry_run(&mut self) -> Result<(), Error> {
+    pub fn dry_run(&mut self) {
         // Build a HostHandler
         let mut host_handler =
             HostHandler::from(self.host.address.clone(), self.host_connection_info.clone())
                 .unwrap();
         if let Err(error) = host_handler.init() {
-            return Err(error);
+            self.final_status = HostWorkFlowStatus::ConnectionInitFailed(
+                format!("{:?}", error)
+            );
+            return;
         }
 
         // Build a context
@@ -192,14 +195,26 @@ impl Job {
 
         match &mut self.hostworkflow {
             Some(host_work_flow) => {
-                host_work_flow.dry_run(&mut host_handler, &mut temp_tera_context)?;
-                self.final_status = host_work_flow.final_status.clone();
+                match host_work_flow.dry_run(&mut host_handler, &mut temp_tera_context) {
+                    Ok(()) => {
+                        self.final_status = host_work_flow.final_status.clone();
+                    }
+                    Err(_error) => {
+                        self.final_status = HostWorkFlowStatus::DryRunFailed;
+                    }
+                }
             }
             None => {
                 let mut host_work_flow = HostWorkFlow::from(&self.tasklist.as_mut().unwrap());
-                host_work_flow.dry_run(&mut host_handler, &mut temp_tera_context)?;
-                self.final_status = host_work_flow.final_status.clone();
-                self.hostworkflow = Some(host_work_flow);
+                match host_work_flow.dry_run(&mut host_handler, &mut temp_tera_context) {
+                    Ok(()) => {
+                        self.final_status = host_work_flow.final_status.clone();
+                        self.hostworkflow = Some(host_work_flow);
+                    }
+                    Err(_error) => {
+                        self.final_status = HostWorkFlowStatus::ApplyFailed;
+                    }
+                }
             }
         }
 
@@ -210,17 +225,19 @@ impl Job {
             }
             _ => self.vars = Some(temp_tera_context.into_json()),
         }
-        Ok(())
     }
 
     /// "APPLY" this job -> evaluate what needs to be done to reach the expected state, then do it
-    pub fn apply(&mut self) -> Result<(), Error> {
+    pub fn apply(&mut self) {
         // Build a HostHandler
         let mut host_handler =
             HostHandler::from(self.host.address.clone(), self.host_connection_info.clone())
                 .unwrap();
         if let Err(error) = host_handler.init() {
-            return Err(error);
+            self.final_status = HostWorkFlowStatus::ConnectionInitFailed(
+                format!("{:?}", error)
+            );
+            return;
         }
 
         // Build a context
@@ -233,14 +250,26 @@ impl Job {
 
         match &mut self.hostworkflow {
             Some(host_work_flow) => {
-                host_work_flow.apply(&mut host_handler, &mut temp_tera_context)?;
-                self.final_status = host_work_flow.final_status.clone();
+                match host_work_flow.apply(&mut host_handler, &mut temp_tera_context) {
+                    Ok(()) => {
+                        self.final_status = host_work_flow.final_status.clone();
+                    }
+                    Err(_error) => {
+                        self.final_status = HostWorkFlowStatus::ApplyFailed;
+                    }
+                }
             }
             None => {
                 let mut host_work_flow = HostWorkFlow::from(&self.tasklist.as_mut().unwrap());
-                host_work_flow.apply(&mut host_handler, &mut temp_tera_context)?;
-                self.final_status = host_work_flow.final_status.clone();
-                self.hostworkflow = Some(host_work_flow);
+                match host_work_flow.apply(&mut host_handler, &mut temp_tera_context) {
+                    Ok(()) => {
+                        self.final_status = host_work_flow.final_status.clone();
+                        self.hostworkflow = Some(host_work_flow);
+                    }
+                    Err(_error) => {
+                        self.final_status = HostWorkFlowStatus::ApplyFailed;
+                    }
+                }
             }
         }
 
@@ -252,8 +281,6 @@ impl Job {
             }
             any_other_value => self.vars = Some(any_other_value),
         }
-
-        Ok(())
     }
 
     pub fn display(&mut self) -> String {
